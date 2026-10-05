@@ -73,10 +73,9 @@ h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
 .topbar {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
   padding: 10px 16px;
-  padding-top: calc(10px + env(safe-area-inset-top, 0px));
   background: var(--chassis-2);
   border-bottom: 1px solid var(--edge);
-  position: sticky; top: 0; z-index: 30;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
 }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-tape { font-size: 19px; transform: rotate(-2deg); }

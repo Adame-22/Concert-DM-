@@ -53,6 +53,7 @@
       $('vol').addEventListener('input', (e) => A.setVolume(parseFloat(e.target.value)));
       $('scene-select').addEventListener('change', (e) => this.gotoScene(parseInt(e.target.value, 10)));
       $('btn-phase').addEventListener('click', () => this.phaseAction());
+      $('armed-cancel').addEventListener('click', () => this.disarm());
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           if (!$('modal').hidden && this.state.phase !== 'debrief') return;
