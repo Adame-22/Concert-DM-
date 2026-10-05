@@ -48,6 +48,11 @@
             <select id="scene-select" class="scene-select"></select>
           </div>
           <div class="hud">
+            <div class="view-toggle" role="group" aria-label="Vue de la scène">
+              <button data-sv="salle" class="on" aria-pressed="true">Vue salle</button>
+              <button data-sv="plan" aria-pressed="false">Plan</button>
+            </div>
+            <span id="mood" class="mood" data-mood="empty" title="Réaction du public">Salle vide</span>
             <div id="larsen-led" class="larsen-led" title="Témoin de larsen"><i></i>LARSEN</div>
             <div id="spl" class="spl" title="Sonomètre à la régie (niveau moyen au public)"><span id="spl-val">—</span><small>dB</small></div>
             <span id="show-time" class="show-time"></span>
@@ -55,8 +60,10 @@
           </div>
         </div>
         <div id="show-progress" class="show-progress" hidden><i></i></div>
+        <div id="cue-bar" class="cue-bar" aria-label="Conducteur du morceau" hidden></div>
         <div class="stage-box">
-          <svg id="stage" class="stage" role="application" aria-label="Plan de scène vu de dessus"></svg>
+          <canvas id="salle" class="salle" role="img" aria-label="La scène vue depuis la régie : musiciens, micros, retours et public"></canvas>
+          <svg id="stage" class="stage" role="application" aria-label="Plan de scène vu de dessus" hidden></svg>
           <div id="armed-hint" class="armed-hint" hidden><span id="armed-text"></span><button id="armed-cancel" class="btn-text">Annuler</button></div>
           <div id="toasts" class="toasts" aria-live="polite"></div>
           <div id="inspector" class="inspector" hidden></div>
@@ -66,6 +73,7 @@
         <div class="side-tabs" role="tablist" aria-label="Panneau">
           <button data-tab="scene" class="on" role="tab" aria-selected="true">Scène</button>
           <button data-tab="valise" role="tab" aria-selected="false">Valise</button>
+          <button data-tab="patch" role="tab" aria-selected="false">Patch</button>
           <button data-tab="tranche" role="tab" aria-selected="false">Tranche</button>
           <button data-tab="analyse" role="tab" aria-selected="false">Analyse</button>
         </div>
@@ -89,6 +97,7 @@
 <script src="js/audio.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/stage.js"></script>
+<script src="js/salle.js"></script>
 <script src="js/mixer.js"></script>
 <script src="js/learn.js"></script>
 <script src="js/game.js"></script>

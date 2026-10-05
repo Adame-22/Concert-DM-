@@ -8,6 +8,7 @@
   const A = root.SonoAudio;
   const Stage = root.SonoStage;
   const Mixer = root.SonoMixer;
+  const Salle = root.SonoSalle;
   const h = U.h;
   const $ = (id) => document.getElementById(id);
   const AUX_COL = ['var(--aux1)', 'var(--aux2)', 'var(--aux3)', 'var(--aux4)'];
@@ -17,8 +18,9 @@
     states: { concert: null, atelier: null },
     state: null,
     view: 'concert',
-    ui: { help: true, layer: 'main', sel: null, armed: null, selCh: null, sideTab: 'scene' },
-    fx: { larsenOn: false, ampDb: -80, freq: 1000, spk: null, micUid: null, needs: [], loop: null, levels: [], aud: null, ringT: 0, clipT: 0 },
+    ui: { help: true, layer: 'main', sel: null, armed: null, selCh: null, sideTab: 'scene', stageView: 'salle' },
+    fx: { larsenOn: false, ampDb: -80, freq: 1000, spk: null, micUid: null, needs: [], loop: null, levels: [], aud: null, ringT: 0, clipT: 0,
+      bubbles: [], busOut: null, mood: { kind: 'empty', text: '' }, unheard: [], mix: [], clapUntil: 0 },
     show: null,
     frame: 0,
     stageDirty: true,
@@ -40,6 +42,10 @@
 
       Stage.init($('stage'), this);
       Mixer.init($('console'), this);
+      Salle.init($('salle'), this);
+      this.ui.stageView = U.store.get('stageView', 'salle') === 'plan' ? 'plan' : 'salle';
+      document.querySelectorAll('.view-toggle [data-sv]').forEach(b => b.addEventListener('click', () => this.setStageView(b.dataset.sv)));
+      this.setStageView(this.ui.stageView);
 
       document.querySelectorAll('.tabs [data-view]').forEach(b => b.addEventListener('click', () => this.switchView(b.dataset.view)));
       document.querySelectorAll('.side-tabs [data-tab]').forEach(b => b.addEventListener('click', () => this.setSideTab(b.dataset.tab)));
@@ -97,6 +103,8 @@
       ['oreille', 'quiz', 'fiches'].forEach(k => { $('view-' + k).hidden = v !== k; });
       if (sim) {
         if (this.show && this.state.mode !== v) this.abortShow();
+        this.fx.clapUntil = 0;
+        $('toasts').innerHTML = '';
         this.state = this.states[v];
         this.ui.sel = null; this.ui.armed = null; this.ui.selCh = null;
         document.body.dataset.mode = v;
@@ -126,6 +134,25 @@
       btn.classList.toggle('on', on);
       btn.textContent = on ? 'Son activé' : 'Son coupé';
       btn.setAttribute('aria-pressed', String(on));
+    },
+
+    setStageView(v) {
+      this.ui.stageView = v;
+      U.store.set('stageView', v);
+      $('salle').hidden = v !== 'salle';
+      $('stage').hidden = v !== 'plan';
+      document.querySelectorAll('.view-toggle [data-sv]').forEach(b => {
+        b.classList.toggle('on', b.dataset.sv === v);
+        b.setAttribute('aria-pressed', String(b.dataset.sv === v));
+      });
+      this.stageDirty = true;
+      if (v === 'salle') Salle.resize();
+    },
+
+    bubble(who, text, secs, kind) {
+      const now = performance.now();
+      this.fx.bubbles = this.fx.bubbles.filter(b => b.until > now && b.who !== who);
+      this.fx.bubbles.push({ who, text, until: now + (secs || 3.5) * 1000, kind: kind || 'say' });
     },
 
     // ------------------------------------------------------------ État / actions
@@ -167,6 +194,7 @@
     attachMic(type, srcId) {
       const r = S.addMic(this.state, type, srcId);
       if (r.error) { this.say(r.error, 'warn'); return; }
+      Salle.queueInstall('mic', r.mic.uid);
       const src = E.findSource(this.state, srcId);
       const [sc, note] = D.suitability(src.type, type);
       if (this.ui.help) this.say((sc >= 3 ? 'Bon choix. ' : sc === 2 ? 'Ça passe. ' : 'Hmm… ') + note, sc >= 2 ? 'ok' : 'warn', 6500);
@@ -182,6 +210,7 @@
     placeWedge(x, y) {
       const r = S.addWedge(this.state, x, y);
       if (r.error) { this.say(r.error, 'warn'); return; }
+      Salle.queueInstall('wedge', r.wedge.uid);
       this.aimWedge(r.wedge);
       this.disarm();
       this.ui.sel = { kind: 'wedge', id: r.wedge.uid };
@@ -336,12 +365,15 @@
       const sc = this.scene();
       this.disarm();
       st.phase = 'show';
-      for (const s of st.sources) { s.playing = true; s.lvlOffset = 0; s.distOffset = 0; s.aim = null; s.x = s.home.x; s.y = s.home.y; }
+      Salle.finishInstalls();
+      for (const s of st.sources) { s.lvlOffset = 0; s.distOffset = 0; s.aim = null; s.x = s.home.x; s.y = s.home.y; }
       this.show = {
-        t: 0, dur: sc.dur, fired: new Set(), ends: [], log: [], reqDelta: {},
+        t: 0, dur: sc.dur, fired: new Set(), ends: [], log: [], reqDelta: {}, cueIdx: -1, warned: new Set(),
         acc: { ticks: 0, gainGood: 0, gainTot: 0, clip: {}, low: {}, dead: {}, larsenT: 0, ringT: 0, larsenBands: {}, larsenCh: {},
-          mixOk: 0, mixTot: 0, mixErr: {}, leqOk: 0, over: 0, leqSum: 0, needsOk: 0, needsTot: 0, needsMiss: {} }
+          mixOk: 0, mixTot: 0, mixErr: {}, leqOk: 0, leqTicks: 0, over: 0, leqSum: 0, needsOk: 0, needsTot: 0, needsMiss: {},
+          unheard: {}, idleOpen: {}, cueTicks: 0, cueOk: 0 }
       };
+      this.applyCue();
       this.ui.sel = null;
       this.say('Rideau ! Le spectacle commence.', 'ok');
       A.applause(2.5);
@@ -369,6 +401,7 @@
       const st = this.state;
       const sc = this.scene();
       sh.t += dt;
+      this.applyCue();
       sc.events.forEach((ev, i) => {
         if (sh.fired.has(i) || sh.t < ev.t) return;
         sh.fired.add(i);
@@ -381,6 +414,7 @@
         sh.ends.push({ at: ev.t + ev.dur, ev });
         sh.log.unshift({ t: ev.t, msg: ev.msg });
         this.say(ev.msg, 'event', 7000);
+        if (ev.say) this.bubble(ev.say.who, ev.say.text, 4);
         this.stageDirty = true; this.sideDirty = true;
       });
       sh.ends = sh.ends.filter(x => {
@@ -395,6 +429,64 @@
         this.stageDirty = true;
         return false;
       });
+    },
+
+    // Le conducteur décide qui joue. Prévient 3 s avant chaque changement.
+    applyCue() {
+      const sh = this.show;
+      const st = this.state;
+      const sc = this.scene();
+      if (!sh || !sc) return;
+      const { cue, idx, next } = D.cueAt(sc, sh.t);
+      if (idx !== sh.cueIdx) {
+        sh.cueIdx = idx;
+        for (const s of st.sources) s.playing = cue.plays.includes(s.id);
+        if (cue.applause) { A.applause((next ? next.t : sc.dur) - cue.t); this.fx.clapUntil = performance.now() + ((next ? next.t : sc.dur) - cue.t) * 1000; }
+        if (sh.t > 0.2) sh.log.unshift({ t: cue.t, msg: '▶ ' + cue.label, cue: true });
+        this.stageDirty = true; this.sideDirty = true;
+        this.renderCueBar();
+      }
+      if (next && sh.t >= next.t - 3.5 && !sh.warned.has(idx + 1)) {
+        sh.warned.add(idx + 1);
+        const advice = this.cueAdvice(cue, next);
+        this.say('Dans 3 s : ' + next.label + (this.ui.help && advice ? ' · ' + advice : ''), 'cue', 4200);
+      }
+    },
+
+    // ce qu’il faut ouvrir / couper au prochain changement
+    cueAdvice(cur, next) {
+      const st = this.state;
+      const open = [], close = [];
+      const chOf = (id) => st.mics.filter(m => m.sourceId === id).map(m => m.ch);
+      for (const id of next.plays) {
+        if (cur.plays.includes(id)) continue;
+        for (const c of chOf(id)) { const ch = st.channels[c]; if (ch.mute || ch.fader < -40) open.push(c + 1); }
+      }
+      for (const id of cur.plays) {
+        if (next.plays.includes(id)) continue;
+        for (const c of chOf(id)) { const ch = st.channels[c]; if (!ch.mute && ch.fader > -40 && D.MICS[st.mics.find(m => m.ch === c).type].kind !== 'di') close.push(c + 1); }
+      }
+      const parts = [];
+      if (open.length) parts.push('ouvre la voie ' + open.join(', '));
+      if (close.length) parts.push('tu peux couper la voie ' + close.join(', '));
+      return parts.join(' · ');
+    },
+
+    renderCueBar() {
+      const bar = $('cue-bar');
+      const sc = this.scene();
+      if (!sc || !sc.cues) { bar.hidden = true; return; }
+      bar.hidden = false;
+      bar.innerHTML = '';
+      const cur = this.show ? this.show.cueIdx : -1;
+      sc.cues.forEach((c, i) => {
+        const end = sc.cues[i + 1] ? sc.cues[i + 1].t : sc.dur;
+        const who = c.plays.map(id => { const s = sc.sources.find(x => x.id === id); return s ? s.name.replace(/ \(.*\)/, '') : id; });
+        const seg = h('div', { class: 'cue-seg' + (i === cur ? ' on' : i < cur ? ' past' : ''), style: 'flex-grow:' + (end - c.t), title: c.label + ' — ' + (who.length ? who.join(', ') : 'personne ne joue') },
+          h('b', null, c.label), h('span', null, who.length ? who.join(' · ') : '—'));
+        bar.appendChild(seg);
+      });
+      bar.appendChild(h('i', { class: 'cue-cursor', id: 'cue-cursor', hidden: !this.show }));
     },
 
     accumulate(dt, levels, aud, needs) {
@@ -422,21 +514,33 @@
         if (this.fx.ch >= 0) acc.larsenCh[this.fx.ch] = (acc.larsenCh[this.fx.ch] || 0) + dt;
         if (this.fx.spk && this.fx.spk !== 'L' && this.fx.spk !== 'R') acc.larsenWedgeT = (acc.larsenWedgeT || 0) + dt;
       } else if (this.fx.loop && this.fx.loop.worst.db > -3) acc.ringT += dt;
-      const ref = aud.perSrc[sc.targets.ref];
-      for (const id in sc.targets.mix) {
-        const p = aud.perSrc[id];
-        if (!p || !ref) continue;
-        const [t, tol] = sc.targets.mix[id];
-        const rel = p.total - ref.total;
+      for (const m of this.fx.mix) {
         acc.mixTot++;
-        if (Math.abs(rel - t) <= tol) acc.mixOk++;
-        const e = acc.mixErr[id] || (acc.mixErr[id] = { sum: 0, n: 0 });
-        e.sum += rel - t; e.n++;
+        if (m.ok) acc.mixOk++;
+        const e = acc.mixErr[m.id] || (acc.mixErr[m.id] = { sum: 0, n: 0, tol: m.tol });
+        e.sum += m.err; e.n++;
       }
       const leq = this.fx.leq;
-      acc.leqSum += leq;
-      if (leq >= sc.targets.leq[0] && leq <= sc.targets.leq[1]) acc.leqOk++;
+      const refSrc = E.findSource(st, sc.targets.ref);
+      if (refSrc && refSrc.playing) {
+        acc.leqTicks++;
+        acc.leqSum += leq;
+        if (leq >= sc.targets.leq[0] && leq <= sc.targets.leq[1]) acc.leqOk++;
+      }
       if (leq > D.LIMITS.leqA) acc.over++;
+      // suivi du conducteur : micros ouverts au bon moment
+      const playingWithMic = st.sources.filter(s => s.playing && st.mics.some(m => m.sourceId === s.id));
+      if (playingWithMic.length) {
+        acc.cueTicks++;
+        if (!this.fx.unheard.length) acc.cueOk++;
+      }
+      for (const id of this.fx.unheard) acc.unheard[id] = (acc.unheard[id] || 0) + dt;
+      for (const L of levels) {
+        if (!L.mic || !L.src || L.src.playing) continue;
+        const ch = st.channels[L.ch];
+        if (D.MICS[L.mic.type].kind === 'di' || ch.mute || ch.fader < -30) continue;
+        acc.idleOpen[L.ch] = (acc.idleOpen[L.ch] || 0) + dt;
+      }
       for (const n of needs) {
         acc.needsTot++;
         if (n.ok) acc.needsOk++;
@@ -488,15 +592,15 @@
       for (const id in acc.mixErr) {
         const e = acc.mixErr[id];
         const avg = e.sum / e.n;
-        const tol = sc.targets.mix[id][1];
+        const tol = e.tol;
         const src = E.findSource(st, id);
         if (Math.abs(avg) > tol) tips.push((src ? src.name : id) + ' était en moyenne ' + (avg > 0 ? 'trop fort' : 'trop faible') + ' de ' + Math.abs(avg).toFixed(0) + ' dB dans le public.');
       }
       if (sc.targets.mix && Object.keys(sc.targets.mix).length) scores.push({ k: 'Équilibre', v: mixScore, w: 20 });
 
-      let leqScore = Math.round(acc.leqOk / Math.max(1, acc.ticks) * 100);
+      let leqScore = acc.leqTicks ? Math.round(acc.leqOk / acc.leqTicks * 100) : 100;
       if (acc.over) { leqScore = Math.max(0, leqScore - 40); tips.push('Tu as dépassé ' + D.LIMITS.leqA + ' dB : c’est la limite légale, et il y a des enfants dans la salle.'); }
-      const leqAvg = acc.leqSum / Math.max(1, acc.ticks);
+      const leqAvg = acc.leqSum / Math.max(1, acc.leqTicks);
       if (leqAvg < sc.targets.leq[0] || leqAvg > sc.targets.leq[1]) tips.push('Niveau moyen au public : ' + Math.round(leqAvg) + ' dB. Visé : ' + sc.targets.leq[0] + ' à ' + sc.targets.leq[1] + ' dB.');
       scores.push({ k: 'Volume', v: leqScore, w: 10 });
 
@@ -511,6 +615,20 @@
         }
         scores.push({ k: 'Retours', v: nScore, w: 10 });
       }
+      let cueScore = acc.cueTicks ? Math.round(acc.cueOk / acc.cueTicks * 100) : 100;
+      for (const id in acc.unheard) {
+        if (acc.unheard[id] < 1) continue;
+        const src = E.findSource(st, id);
+        const chs = st.mics.filter(m => m.sourceId === id).map(m => m.ch + 1).join(', ');
+        tips.push((src ? src.name : id) + ' a joué ' + Math.round(acc.unheard[id]) + ' s sans être dans la façade (voie ' + chs + ' coupée ou fermée). Suis le conducteur : ouvre la voie juste avant son entrée.');
+      }
+      let idleT = 0;
+      for (const ch in acc.idleOpen) {
+        idleT += acc.idleOpen[ch];
+        if (acc.idleOpen[ch] > 6) tips.push('La ' + chName(+ch) + ' est restée ouverte ' + Math.round(acc.idleOpen[ch]) + ' s alors que personne n’y jouait : un micro ouvert pour rien capte la salle et rapproche le larsen.');
+      }
+      cueScore = Math.max(0, cueScore - Math.min(25, Math.round(idleT)));
+      scores.push({ k: 'Conducteur', v: cueScore, w: 10 });
       const practice = Math.max(0, 100 - issues.length * 15);
       for (const i of issues) tips.push(i.text);
       scores.push({ k: 'Bonnes pratiques', v: practice, w: 5 });
@@ -527,6 +645,7 @@
       this.fx.ampDb = -80;
       A.setFeedback(1000, 0);
       A.applause(total >= 60 ? 4 : 2);
+      this.fx.clapUntil = performance.now() + (total >= 60 ? 4500 : 2500);
       this.renderSceneSelect();
       this.renderAll();
       this.openDebrief(sc, total, scores, tips, prev);
@@ -574,7 +693,9 @@
       const loop = E.computeLoop(st);
       const aud = E.computeAudience(st, levels);
       const sc = this.scene();
-      const needs = E.checkNeeds(st, levels, sc ? sc.needs : [], this.show ? this.show.reqDelta : {});
+      const needsAll = E.checkNeeds(st, levels, sc ? sc.needs : [], this.show ? this.show.reqDelta : {});
+      // pendant le spectacle, seuls les musiciens qui jouent réclament leur retour
+      const needs = this.show ? needsAll.filter(n => { const w = E.findSource(st, n.who); return w && w.playing; }) : needsAll;
       this.fx.levels = levels; this.fx.loop = loop; this.fx.aud = aud; this.fx.needs = needs;
 
       // larsen
@@ -612,6 +733,7 @@
         A.crackle(0.6); fx.clipT = now;
       }
       fx.leq = fx.larsenOn ? E.dbAdd(aud.leq, 100 + fx.ampDb * 0.8) : aud.leq;
+      this.computeReactions(levels, aud, sc, now);
 
       if (this.show) {
         this.accumulate(dt, levels, aud, needs);
@@ -622,15 +744,70 @@
       Mixer.updateGeqRisk(loop);
       if (this.show && this.frame % 4 === 0) this.stageDirty = true;
       if (this.frame % 10 === 0) this.stageDirty = true;
-      if (this.stageDirty) { Stage.render(); this.stageDirty = false; }
+      if (this.stageDirty && this.ui.stageView === 'plan') { Stage.render(); this.stageDirty = false; }
       if (this.sideDirty) { this.renderSide(); this.sideDirty = false; }
       if (this.frame % 2 === 0) this.updateSideLive();
       this.updateHud();
     },
 
+    // Ce que voient les bonhommes et le public : niveaux des enceintes, humeur de la salle
+    computeReactions(levels, aud, sc, now) {
+      const st = this.state;
+      const fx = this.fx;
+      // niveau qui sort de chaque bus (dBFS moyen)
+      const mainParts = [], auxParts = [[], [], [], []];
+      for (const L of levels) {
+        if (!L.alive || L.avg <= E.NEG + 1) continue;
+        const ch = st.channels[L.ch];
+        if (ch.mute) continue;
+        mainParts.push(L.avg + ch.fader);
+        for (let k = 0; k < 4; k++) if (ch.sends[k] > E.NEG + 1) auxParts[k].push(L.avg + ch.sends[k]);
+      }
+      fx.busOut = {
+        main: st.main.mute ? E.NEG : E.dbSum(mainParts) + st.main.fader,
+        aux: auxParts.map((p, k) => st.aux[k].mute ? E.NEG : E.dbSum(p) + st.aux[k].fader)
+      };
+      fx.mix = E.mixCheck(sc, st, aud);
+      // musiciens qui jouent sans passer dans la façade alors qu’on ne les entend pas assez
+      const floor = (sc ? sc.targets.leq[0] : 70) - 6;
+      fx.unheard = [];
+      const live = !!this.show || st.mode === 'atelier';
+      if (live) {
+        for (const s of st.sources) {
+          if (!s.playing || !st.mics.some(m => m.sourceId === s.id)) continue;
+          const p = aud.perSrc[s.id];
+          if (p && p.pa <= E.NEG + 1 && p.acoustic < floor) fx.unheard.push(s.id);
+        }
+      }
+      fx.bubbles = fx.bubbles.filter(b => b.until > now);
+      // humeur du public
+      let kind = 'empty';
+      const leq = fx.leq;
+      if (now < fx.clapUntil) kind = 'clap';
+      else if (live) {
+        const cue = sc && this.show ? D.cueAt(sc, this.show.t).cue : null;
+        const ref = sc ? E.findSource(st, sc.targets.ref) : null;
+        if (fx.larsenOn) kind = 'larsen';
+        else if (cue && cue.applause) kind = 'clap';
+        else if (leq > D.LIMITS.leqA || (sc && leq > sc.targets.leq[1] + 3)) kind = 'loud';
+        else if (fx.unheard.length || (ref && ref.playing && sc && leq < sc.targets.leq[0] - 4)) kind = 'quiet';
+        else kind = fx.mix.every(m => m.ok) && (!ref || !ref.playing || (leq >= sc.targets.leq[0] && leq <= sc.targets.leq[1])) ? 'happy' : 'ok';
+      }
+      const TXT = { empty: 'Salle vide', clap: 'Applaudissements', larsen: 'Aïe, les oreilles !', loud: 'Trop fort !', quiet: 'On n’entend pas !', happy: 'Le public adore', ok: 'Le public écoute' };
+      if (fx.mood.kind !== kind) {
+        fx.mood = { kind, text: TXT[kind], since: now };
+        if (this.show && kind === 'quiet' && fx.unheard.length) {
+          const s0 = E.findSource(st, fx.unheard[0]);
+          const ch = st.mics.find(m => m.sourceId === fx.unheard[0]);
+          this.say('Le public n’entend pas ' + (s0 ? s0.name : '') + (ch && this.ui.help ? ' : sa voie ' + (ch.ch + 1) + ' est fermée.' : '.'), 'warn', 4000);
+        }
+      }
+    },
+
     // ------------------------------------------------------------ Rendu
     renderAll() {
       this.refreshPoses();
+      this.renderCueBar();
       Mixer.refresh();
       Stage.render();
       this.renderSide();
@@ -664,6 +841,11 @@
       if (leq > D.LIMITS.leqA) spl.classList.add('max');
       else if (sc && leq > 20) spl.classList.add(leq < sc.targets.leq[0] ? 'lo' : leq > sc.targets.leq[1] ? 'hi' : 'ok');
       $('larsen-led').classList.toggle('on', this.fx.larsenOn);
+      const mood = $('mood');
+      mood.textContent = this.fx.mood.text || 'Salle vide';
+      mood.dataset.mood = this.fx.mood.kind;
+      const cur = $('cue-cursor');
+      if (cur && this.show) { cur.hidden = false; cur.style.left = (this.show.t / this.show.dur * 100) + '%'; }
     },
 
     // ------------------------------------------------------------ Panneau latéral
@@ -674,6 +856,7 @@
       const t = this.ui.sideTab;
       if (t === 'scene') body.appendChild(this.state.mode === 'concert' ? this.panelScene() : this.panelAtelier());
       else if (t === 'valise') body.appendChild(this.panelValise());
+      else if (t === 'patch') body.appendChild(this.panelPatch());
       else if (t === 'tranche') body.appendChild(this.panelTranche());
       else if (t === 'analyse') body.appendChild(this.panelAnalyse());
     },
@@ -713,6 +896,15 @@
         h('h4', null, 'Balance : fais jouer les musiciens'),
         h('button', { class: 'btn-text', onclick: () => { const all = st.sources.every(s => s.playing); st.sources.forEach(s => { s.playing = !all; }); this.sideDirty = true; this.stageDirty = true; } }, st.sources.every(s => s.playing) ? 'Tout le monde se tait' : 'Tout le monde joue')));
       wrap.appendChild(h('ul', { class: 'mus-list' }, st.sources.map(s => this.musicianRow(s))));
+      if (sc.cues) {
+        wrap.appendChild(h('h4', null, 'Le conducteur'));
+        const ol = h('ol', { class: 'cue-list' });
+        sc.cues.forEach((c) => {
+          const who = c.plays.map(id => (sc.sources.find(x => x.id === id) || {}).name || id);
+          ol.appendChild(h('li', null, h('span', { class: 'ev-t' }, c.t + ' s'), h('span', null, h('b', null, c.label), ' · ' + (who.length ? who.join(', ') : 'personne ne joue'))));
+        });
+        wrap.appendChild(ol);
+      }
       if (sc.needs.length) {
         wrap.appendChild(h('h4', null, 'Retours'));
         const ul = h('ul', { class: 'need-list' });
@@ -787,6 +979,52 @@
           }
         }, 'Tout ranger dans la valise')));
       }
+      return wrap;
+    },
+
+    repatch(micUid, ch) {
+      const st = this.state;
+      const mic = st.mics.find(m => m.uid === micUid);
+      if (!mic || mic.ch === ch) return;
+      const other = st.mics.find(m => m.ch === ch);
+      const old = mic.ch;
+      mic.ch = ch;
+      if (other) other.ch = old;
+      Salle.queue.push({ kind: 'box', uid: 'patch' + Date.now() });
+      const src = E.findSource(st, mic.sourceId);
+      this.say('Micro ' + (src ? 'de ' + src.name + ' ' : '') + 'rebranché sur la prise ' + (ch + 1) + ' : il arrive maintenant sur la voie ' + (ch + 1) + ' de la console, avec les réglages de cette voie.' + (other ? ' L’autre micro passe sur la voie ' + (old + 1) + '.' : ''), 'info', 7000);
+      this.ui.selCh = ch;
+      Mixer.refresh();
+      this.sideDirty = true; this.stageDirty = true;
+      this.renderInspector();
+    },
+
+    panelPatch() {
+      const st = this.state;
+      const wrap = h('div', { class: 'panel' });
+      wrap.appendChild(h('h3', null, 'Le patch'));
+      wrap.appendChild(h('p', { class: 'muted' }, 'Chaque micro est branché sur une prise du boîtier de scène. La prise 1 arrive sur la voie 1 de la console, la prise 2 sur la voie 2… Rebrancher un micro ailleurs, c’est le faire arriver sur une autre voie, avec les réglages de cette voie.'));
+      const tbl = h('ol', { class: 'patch-list' });
+      for (let i = 0; i < st.channels.length; i++) {
+        const mic = st.mics.find(m => m.ch === i);
+        const src = mic ? E.findSource(st, mic.sourceId) : null;
+        const def = mic ? D.MICS[mic.type] : null;
+        const label = mic ? (src ? src.name : 'sans musicien') : 'libre';
+        const sel = h('select', { class: 'patch-sel', 'aria-label': 'Déplacer vers la prise', disabled: !mic || !this.canEdit() ? true : null });
+        sel.appendChild(h('option', { value: '' }, 'Déplacer…'));
+        for (let j = 0; j < st.channels.length; j++) if (j !== i) {
+          const o = st.mics.find(m => m.ch === j);
+          const os = o ? E.findSource(st, o.sourceId) : null;
+          sel.appendChild(h('option', { value: String(j) }, 'Prise ' + (j + 1) + (o ? ' (échange avec ' + (os ? os.name : D.MICS[o.type].short) + ')' : '')));
+        }
+        sel.addEventListener('change', () => { if (sel.value !== '') this.repatch(mic.uid, parseInt(sel.value, 10)); });
+        tbl.appendChild(h('li', { class: 'patch-row' + (mic ? '' : ' free') + (this.ui.selCh === i ? ' on' : '') },
+          h('span', { class: 'patch-n' }, String(i + 1)),
+          h('span', { class: 'patch-main' }, h('b', null, label), h('span', { class: 'case-model' }, def ? def.model + (def.hf ? ' · récepteur sans fil' : '') : '—')),
+          mic ? sel : h('span')));
+      }
+      wrap.appendChild(tbl);
+      if (this.ui.help) wrap.appendChild(h('div', { class: 'hint-box' }, h('h4', null, 'Astuce de pro'), h('p', null, 'Garde toujours le même ordre : batterie, basse, guitares, claviers, chants. Le jour J, tu retrouves chaque voie sans chercher.')));
       return wrap;
     },
 
@@ -1030,6 +1268,18 @@
           content.appendChild(h('label', { class: 'insp-range', for: 'insp-dist' }, h('span', null, 'Distance à la source'), out));
           content.appendChild(range);
           if (this.ui.help) content.appendChild(h('p', { class: 'muted small' }, 'Idéal : ' + stDef.dist[0] + ' à ' + stDef.dist[1] + ' cm. Chaque fois que la distance double, le micro capte 6 dB de moins.'));
+        }
+        if (this.canEdit()) {
+          const ps = h('select', { id: 'insp-patch', class: 'patch-sel' });
+          for (let j = 0; j < st.channels.length; j++) {
+            const o = st.mics.find(m => m.ch === j);
+            const os = o && o !== mic ? E.findSource(st, o.sourceId) : null;
+            const opt = h('option', { value: String(j) }, 'Prise ' + (j + 1) + (o && o !== mic ? ' (occupée : ' + (os ? os.name : D.MICS[o.type].short) + ')' : ''));
+            if (j === mic.ch) opt.selected = true;
+            ps.appendChild(opt);
+          }
+          ps.addEventListener('change', () => this.repatch(mic.uid, parseInt(ps.value, 10)));
+          content.appendChild(h('label', { class: 'insp-range', for: 'insp-patch' }, h('span', null, def.hf ? 'Récepteur branché sur' : 'Câble branché sur'), ps));
         }
         content.appendChild(h('div', { class: 'insp-actions' },
           h('button', { class: 'btn-text strong', onclick: () => this.selectChannel(mic.ch) }, 'Régler la voie ' + (mic.ch + 1)),

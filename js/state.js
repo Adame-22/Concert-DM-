@@ -40,7 +40,8 @@
       id: def.id, type: def.type, name: def.name || D.SOURCES[def.type].name,
       x: def.x, y: def.y, home: { x: def.x, y: def.y },
       facing: def.facing != null ? def.facing : Math.PI / 2,
-      playing: true, dyn: 0, lvlOffset: 0, distOffset: 0, aim: null
+      playing: true, dyn: 0, lvlOffset: 0, distOffset: 0, aim: null,
+      look: def.look || null
     };
   }
 

@@ -81,10 +81,10 @@ test('le retour dans l’axe mort d’un cardioïde laisse plus de marge que sur
   assert.ok(side - behind > 4, `derrière ${behind}, côté ${side}`);
 });
 
-test('chaque plateau du concert a une solution sans larsen qui tient les objectifs', () => {
+test('chaque plateau du concert a une solution sans larsen qui tient les objectifs, à chaque moment du conducteur', () => {
   const solutions = [
     { plan: [['col', 'parole']], fader: [-12], dist: { parole: 15 } },
-    { plan: [['km184', 'chorale'], ['km184', 'chorale'], ['c414', 'piano']], fader: [-15, -15, -15], wedges: [[4.6, 3.6, 0]], sends: [[2, 0, -6]] },
+    { plan: [['km184', 'chorale'], ['km184', 'chorale'], ['c414', 'piano'], ['sm58', 'soliste']], fader: [-15, -15, -15, -7], wedges: [[4.2, 3.4, 0]], sends: [[2, 0, -6]] },
     { plan: [['sm58', 'voix'], ['di_act', 'guitare_folk']], fader: [0, -4], wedges: [[4.4, 4.6, 0], [6.0, 4.4, 1]], sends: [[0, 0, -6], [1, 0, -10], [0, 1, -6]] },
     { plan: [['hf58', 'voix'], ['beta52', 'gc'], ['sm57', 'cc'], ['km184', 'oh'], ['di_act', 'basse'], ['sm57', 'guitare_elec'], ['di_pass', 'clavier']],
       fader: [0, -8, -10, -14, -8, -12, -8], wedges: [[5, 4.7, 0], [2.4, 3.3, 1]], sends: [[0, 0, -8], [1, 1, 2]], gainTarget: { 1: -26, 2: -26 } },
@@ -99,23 +99,35 @@ test('chaque plateau du concert a une solution sans larsen qui tient les objecti
     st.mics.forEach(m => setGain(st, m.ch, (sol.gainTarget && sol.gainTarget[m.ch]) || -20));
     sol.fader.forEach((f, k) => { st.channels[k].fader = f; });
     (sol.wedges || []).forEach(([x, y, bus]) => { const w = S.addWedge(st, x, y, bus).wedge; w.angle = -Math.PI / 2; });
-    if (i === 3) st.wedges[1].angle = -Math.PI / 2;
     (sol.sends || []).forEach(([ch, bus, db]) => { st.channels[ch].sends[bus] = db; });
-    const levels = E.computeLevels(st);
-    const loop = E.computeLoop(st);
-    const aud = E.computeAudience(st, levels);
-    assert.ok(loop.worst.db < -3, `${sc.id} : marge insuffisante (${loop.worst.db.toFixed(1)} dB)`);
-    assert.ok(aud.leq >= sc.targets.leq[0] && aud.leq <= sc.targets.leq[1], `${sc.id} : niveau ${aud.leq.toFixed(1)} hors cible`);
-    const ref = aud.perSrc[sc.targets.ref].total;
-    for (const id in sc.targets.mix) {
-      const [t, tol] = sc.targets.mix[id];
-      const rel = aud.perSrc[id].total - ref;
-      assert.ok(Math.abs(rel - t) <= tol, `${sc.id} : ${id} à ${rel.toFixed(1)} dB (cible ${t}±${tol})`);
-    }
-    for (const L of levels) if (L.mic) assert.ok(L.peak < 0, `${sc.id} : voie ${L.ch + 1} sature`);
     const place = E.evaluatePlacement(st);
     for (const p of place) assert.ok(p.score >= 0.99, `${sc.id} : ${p.note}`);
+    for (const cue of sc.cues) {
+      st.sources.forEach(s => { s.playing = cue.plays.includes(s.id); });
+      const levels = E.computeLevels(st);
+      const loop = E.computeLoop(st);
+      const aud = E.computeAudience(st, levels);
+      const tag = `${sc.id} / ${cue.label}`;
+      assert.ok(loop.worst.db < -3, `${tag} : marge insuffisante (${loop.worst.db.toFixed(1)} dB)`);
+      if (cue.plays.includes(sc.targets.ref)) {
+        assert.ok(aud.leq >= sc.targets.leq[0] && aud.leq <= sc.targets.leq[1], `${tag} : niveau ${aud.leq.toFixed(1)} hors cible`);
+      }
+      for (const m of E.mixCheck(sc, st, aud)) {
+        assert.ok(m.ok, `${tag} : ${m.id} à ${m.rel.toFixed(1)} dB de ${m.ref} (cible ${m.expected}±${m.tol})`);
+      }
+      for (const L of levels) if (L.mic && L.src && L.src.playing) assert.ok(L.peak < 0, `${tag} : voie ${L.ch + 1} sature`);
+    }
   });
+});
+
+test('conducteur : chaque plateau commence à 0 s et ses musiciens existent', () => {
+  for (const sc of D.SCENES) {
+    assert.strictEqual(sc.cues[0].t, 0, sc.id);
+    const ids = new Set(sc.sources.map(s => s.id));
+    for (const c of sc.cues) for (const id of c.plays) assert.ok(ids.has(id), `${sc.id} : ${id} inconnu`);
+    for (let k = 1; k < sc.cues.length; k++) assert.ok(sc.cues[k].t > sc.cues[k - 1].t && sc.cues[k].t < sc.dur, sc.id);
+    assert.strictEqual(D.cueAt(sc, sc.dur - 1).cue, sc.cues[sc.cues.length - 1]);
+  }
 });
 
 test('un micro pointé vers son retour fait partir le larsen', () => {

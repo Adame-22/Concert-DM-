@@ -354,9 +354,34 @@
     return { perSrc, leq: dbSum(all) };
   }
 
+  // ------------------------------------------------------------ Équilibre du mix
+  // Compare les sources qui jouent. La référence est celle qui a la cible la plus haute
+  // (le chant s’il chante, sinon l’instrument le plus en avant à ce moment-là).
+  function mixCheck(scene, state, aud) {
+    if (!scene || !scene.targets) return [];
+    const tg = Object.assign({}, scene.targets.mix);
+    tg[scene.targets.ref] = [0, 0];
+    const cands = [];
+    for (const id in tg) {
+      const src = findSource(state, id);
+      const p = aud.perSrc[id];
+      if (!src || src.playing === false || !p || p.total <= NEG + 1) continue;
+      cands.push({ id, t: tg[id][0], tol: tg[id][1], total: p.total });
+    }
+    if (cands.length < 2) return [];
+    cands.sort((a, b) => b.t - a.t);
+    const ref = cands[0];
+    return cands.slice(1).map(c => {
+      const rel = c.total - ref.total;
+      const expected = c.t - ref.t;
+      const tol = Math.max(c.tol, ref.tol);
+      return { id: c.id, ref: ref.id, rel, expected, tol, err: rel - expected, ok: Math.abs(rel - expected) <= tol };
+    });
+  }
+
   // ------------------------------------------------------------ Retours : chaque musicien s’entend-il ?
   // Signal requis dans le retour (dBFS moyen) pour qu’un musicien s’entende
-  const NEED_DB = -28;
+  const NEED_DB = -32;
   function checkNeeds(state, levels, needs, reqDelta) {
     const out = [];
     for (const n of needs || []) {
@@ -453,7 +478,7 @@
   const api = {
     NEG, BANDS, NB, dbSum, dbAdd, clamp, faderToDb, dbToFader, hpfDb, eqDb, chFilterDb,
     polarRaw, polarDb, micPose, speakerList, computeLevels, computeLoop, computeAudience,
-    checkNeeds, evaluatePlacement, auditPractices, findSource, audienceAtt, NEED_DB
+    checkNeeds, mixCheck, evaluatePlacement, auditPractices, findSource, audienceAtt, NEED_DB
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SonoEngine = api;

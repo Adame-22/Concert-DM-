@@ -117,6 +117,15 @@
       html: () => '<p>Tableau tiré du simulateur. Les modèles cités sont les plus courants : si l’école a d’autres marques, cherche l’équivalent (dynamique, statique, directivité).</p>' + micTable()
     },
     {
+      id: 'patch', title: 'Le patch et le conducteur',
+      html: () => '<p><b>Le patch</b>, c’est qui est branché où. Chaque micro part en câble XLR jusqu’au <b>boîtier de scène</b>. La prise 1 du boîtier arrive sur la voie 1 de la console, la prise 2 sur la voie 2, et ainsi de suite. Les micros sans fil n’ont pas de câble : c’est leur récepteur qui est branché au boîtier.</p>' +
+        '<p class="callout">Si un micro arrive sur la mauvaise voie, il prend les réglages de cette voie : le 48 V, le gain, l’égaliseur… d’un autre instrument. Le line check sert à vérifier ça avant que le public entre.</p>' +
+        '<p><b>Le conducteur</b>, c’est le déroulé du morceau ou de la soirée : qui joue, quand. On le garde sous les yeux pendant le concert pour anticiper :</p><ol class="rules">' +
+        '<li>Ouvre la voie d’un musicien <b>juste avant</b> qu’il commence (un solo, une prise de parole).</li>' +
+        '<li>Coupe-la quand il a fini : un micro ouvert pour rien capte la salle et rapproche le larsen.</li>' +
+        '<li>Note sur ta feuille les moments délicats : la chanteuse qui descend dans le public, le pont a cappella, les applaudissements.</li></ol>'
+    },
+    {
       id: 'retours', title: 'Les retours',
       html: () => '<p>Les retours permettent aux musiciens de s’entendre. Chaque sortie « Retour » de la console a son propre mix.</p><ol class="rules">' +
         '<li>Demande à chacun <b>ce qu’il veut entendre</b> : souvent sa propre voix, et l’instrument qui donne le tempo ou la note.</li>' +
