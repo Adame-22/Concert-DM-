@@ -183,8 +183,15 @@
     return el;
   }
 
-  function toast(container, msg, kind, ms) {
-    const t = h('div', { class: 'toast ' + (kind || '') }, msg);
+  function avatar(person, cls) {
+    if (!person) return null;
+    return h('span', { class: 'avatar ' + (cls || ''), style: '--c:' + person.color, 'aria-hidden': 'true' }, person.initials);
+  }
+
+  function toast(container, msg, kind, ms, person) {
+    const t = person
+      ? h('div', { class: 'toast said ' + (kind || '') }, avatar(person), h('div', { class: 'said-body' }, h('b', { class: 'said-who', style: '--c:' + person.color }, person.name), h('span', null, msg)))
+      : h('div', { class: 'toast ' + (kind || '') }, msg);
     container.appendChild(t);
     while (container.children.length > 3) container.firstChild.remove();
     setTimeout(() => t.classList.add('out'), ms || 5200);
@@ -197,5 +204,5 @@
     set(k, v) { try { localStorage.setItem('sonosim.' + k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
   };
 
-  root.SonoUI = { h, knob, fader, meter, toast, fmtDb, fmtHz, store, SEGS };
+  root.SonoUI = { h, knob, fader, meter, toast, avatar, fmtDb, fmtHz, store, SEGS };
 })(this);

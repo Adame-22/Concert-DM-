@@ -12,11 +12,20 @@ Clique sur **Activer le son** en haut pour entendre les larsens, les saturations
 
 | Onglet | À quoi ça sert |
 | --- | --- |
-| **Le concert** | Les 5 plateaux de la soirée : mot d’accueil, chorale + soliste + piano, duo folk, atelier rock, grand final. Pour chacun : tu poses les micros et les retours, tu fais jouer les musiciens pour régler tes gains, puis tu lèves le rideau. Chaque morceau suit un **conducteur** (intro guitare seule, solo de la soliste, pont a cappella…) : à toi d’ouvrir et de couper les bonnes voies au bon moment. Pendant le spectacle il se passe des choses (la chanteuse descend dans le public, le micro pointe vers le retour, une enfant intimidée recule…). À la fin : une note sur 100 et la liste de ce qu’il faut retravailler. |
+| **Le concert** | Les 6 plateaux de la soirée : mot d’accueil, chorale + soliste + piano, duo folk, morceau des profs (flûte, violon, guitare, piano), atelier rock, grand final. Pour chacun : tu poses les micros et les retours, tu fais jouer les musiciens pour régler tes gains, puis tu lèves le rideau. Chaque morceau suit un **conducteur** (intro guitare seule, solo de la soliste, pont a cappella…) : à toi d’ouvrir et de couper les bonnes voies au bon moment. Pendant le spectacle il se passe des choses (la chanteuse descend dans le public, le micro pointe vers le retour, une enfant intimidée recule…). À la fin : une note sur 100 et la liste de ce qu’il faut retravailler. |
 | **Atelier libre** | Matériel illimité, pas de chrono. Ajoute n’importe quel instrument et regarde l’effet de chaque réglage sur la marge avant larsen. |
 | **Oreille** | Reconnaître la fréquence d’un larsen, et l’éteindre le plus vite possible sur l’EQ graphique. |
 | **Quiz** | 12 questions tirées au hasard, chacune expliquée. |
 | **Fiches** | La chaîne du son, dynamique / statique / DI, directivités, larsen, gain pas à pas, quel micro pour quoi, retours, check-list du jour J, glossaire. |
+
+### Les gens du concert
+
+- **Jérôme** et **Marc**, les mentors : ils te parlent au talkie pendant la partie (conseils, alertes larsen) et font le débrief.
+- **Christine**, la directrice : elle ouvre la soirée au pupitre et annonce le final.
+- **Lucie**, directrice adjointe et prof de piano : elle gère le déroulé, te prévient avant chaque changement, et joue du piano (chorale, morceau des profs) et du clavier (final).
+- **Les profs de guitare, de flûte traversière et de violon** : ils accompagnent les élèves et jouent leur propre morceau.
+
+Les prénoms et les rôles sont dans `PEOPLE` (`js/data.js`) : il suffit de les modifier pour donner leur prénom aux profs.
 
 ### La vue salle
 

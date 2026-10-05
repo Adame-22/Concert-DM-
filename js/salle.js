@@ -231,7 +231,7 @@
           const last = this.autoBubbles[n.who] || -99;
           if (this.t - last > 9) {
             this.autoBubbles[n.who] = this.t;
-            G.bubble(n.who, n.hasWedge ? 'Je m’entends pas !' : 'Il me faut un retour !', 3, 'need');
+            G.bubble(n.who, n.hasWedge ? 'Pas assez dans mon retour !' : 'Il me faut un retour !', 3, 'need');
           }
         }
       }

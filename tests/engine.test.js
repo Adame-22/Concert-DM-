@@ -86,6 +86,7 @@ test('chaque plateau du concert a une solution sans larsen qui tient les objecti
     { plan: [['col', 'parole']], fader: [-12], dist: { parole: 15 } },
     { plan: [['km184', 'chorale'], ['km184', 'chorale'], ['c414', 'piano'], ['sm58', 'soliste']], fader: [-15, -15, -15, -7], wedges: [[4.2, 3.4, 0]], sends: [[2, 0, -6]] },
     { plan: [['sm58', 'voix'], ['di_act', 'guitare_folk']], fader: [0, -4], wedges: [[4.4, 4.6, 0], [6.0, 4.4, 1]], sends: [[0, 0, -6], [1, 0, -10], [0, 1, -6]] },
+    { plan: [['km184', 'flute'], ['km184', 'violon'], ['c414', 'piano'], ['di_act', 'guitare_folk']], fader: [-6, -6, -8, -8], wedges: [[3.8, 4.7, 0]], sends: [[2, 0, -4]] },
     { plan: [['hf58', 'voix'], ['beta52', 'gc'], ['sm57', 'cc'], ['km184', 'oh'], ['di_act', 'basse'], ['sm57', 'guitare_elec'], ['di_pass', 'clavier']],
       fader: [0, -8, -10, -14, -8, -12, -8], wedges: [[5, 4.7, 0], [2.4, 3.3, 1]], sends: [[0, 0, -8], [1, 1, 2]], gainTarget: { 1: -26, 2: -26 } },
     { plan: [['sm58', 'voix'], ['km184', 'chorale'], ['km184', 'chorale'], ['di_pass', 'clavier'], ['di_act', 'guitare_folk'], ['di_act', 'basse'], ['beta52', 'cajon']],
@@ -131,7 +132,7 @@ test('conducteur : chaque plateau commence à 0 s et ses musiciens existent', ()
 });
 
 test('un micro pointé vers son retour fait partir le larsen', () => {
-  const st = setup(3, [['hf58', 'voix']]);
+  const st = setup(D.SCENES.findIndex(x => x.id === 'rock'), [['hf58', 'voix']]);
   st.channels[0].sends[0] = -2;
   S.addWedge(st, 5, 4.7, 0).wedge.angle = -Math.PI / 2;
   const before = E.computeLoop(st).worst.db;
@@ -139,4 +140,13 @@ test('un micro pointé vers son retour fait partir le larsen', () => {
   const after = E.computeLoop(st).worst.db;
   assert.ok(before < -6, `avant ${before}`);
   assert.ok(after > 0, `après ${after}`);
+});
+
+test('chaque personne citée dans le concert existe, et chaque plateau a son intro et des conseils des mentors', () => {
+  for (const sc of D.SCENES) {
+    assert.ok(D.PEOPLE[sc.intro.who], sc.id + ' : intro');
+    for (const h of sc.hints) assert.ok(['jerome', 'marc'].includes(h.who), sc.id + ' : conseil');
+    for (const s of sc.sources) if (s.person) assert.ok(D.PEOPLE[s.person], sc.id + ' : ' + s.person);
+    for (const e of sc.events) if (e.from) assert.ok(D.PEOPLE[e.from], sc.id + ' : ' + e.from);
+  }
 });

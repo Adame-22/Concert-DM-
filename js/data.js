@@ -378,11 +378,31 @@
   // needs : ce que chaque musicien veut entendre dans son retour
   // cues : le conducteur du morceau — qui joue, et quand
   // look : apparence du bonhomme (vue salle)
+  // ---------------------------------------------------------------- Les gens
+  // Les mentors te parlent pendant le jeu ; les autres sont sur scène ou t’adressent des demandes.
+  const PEOPLE = {
+    jerome: { name: 'Jérôme', role: 'Mentor son', initials: 'J', color: '#f2a53a' },
+    marc: { name: 'Marc', role: 'Mentor son', initials: 'M', color: '#58aee0' },
+    christine: { name: 'Christine', role: 'Directrice de l’école', initials: 'C', color: '#bb86e6' },
+    lucie: { name: 'Lucie', role: 'Directrice adjointe, prof de piano', initials: 'L', color: '#ea829f' },
+    profGuitare: { name: 'Le prof de guitare', role: 'Prof de guitare', initials: 'G', color: '#5ccaa9' },
+    profFlute: { name: 'Le prof de flûte', role: 'Prof de flûte traversière', initials: 'F', color: '#e0c068' },
+    profViolon: { name: 'Le prof de violon', role: 'Prof de violon', initials: 'V', color: '#c58b4c' }
+  };
+  const LOOKS = {
+    christine: { shirt: '#7a3b5e', hair: '#3b2a20', skin: '#f1c9a5', style: 'bun' },
+    lucie: { shirt: '#ea829f', hair: '#5a3220', skin: '#f1c9a5', style: 'long' },
+    profGuitare: { shirt: '#3d6b5c', hair: '#3b2a20', skin: '#e8b48f', style: 'short' },
+    profFlute: { shirt: '#c9a227', hair: '#1f1712', skin: '#c98e66', style: 'bun' },
+    profViolon: { shirt: '#8a4b22', hair: '#9a9a9a', skin: '#f1c9a5', style: 'curly' }
+  };
+
   const SCENES = [
     {
-      id: 'accueil', title: 'Mot d’accueil', subtitle: 'La directrice ouvre la soirée', dur: 60,
-      brief: 'La salle est pleine. La directrice monte sur scène, côté cour, et parle au pupitre. Elle n’a pas l’habitude des micros : elle parle doucement et bouge la tête en lisant ses notes. Au milieu de son discours, la salle applaudit.',
-      sources: [{ id: 'parole', type: 'parole', name: 'La directrice', x: 7.2, y: 4.0, look: { shirt: '#7a3b5e', hair: '#3b2a20', skin: '#f1c9a5', style: 'bun' } }],
+      id: 'accueil', title: 'Mot d’accueil', subtitle: 'Christine ouvre la soirée', dur: 60,
+      intro: { who: 'lucie', text: 'On commence par Christine, au pupitre côté cour. Fais-moi un son propre : tout le monde doit l’entendre jusqu’au fond de la salle.' },
+      brief: 'La salle est pleine. Christine, la directrice, monte sur scène et parle au pupitre. Une voix parlée est douce, et en lisant ses notes on s’éloigne vite du micro. Au milieu du discours, la salle applaudit.',
+      sources: [{ id: 'parole', type: 'parole', name: 'Christine (directrice)', person: 'christine', x: 7.2, y: 4.0, look: LOOKS.christine }],
       targets: { ref: 'parole', mix: {}, leq: [66, 78] },
       needs: [],
       cues: [
@@ -391,22 +411,23 @@
         { t: 29, label: 'Remerciements', plays: ['parole'] }
       ],
       events: [
-        { t: 12, type: 'distance', source: 'parole', delta: 15, dur: 10, msg: 'La directrice baisse la tête vers ses notes : elle s’éloigne du micro.', say: { who: 'parole', text: '…euh…' } },
-        { t: 36, type: 'level', source: 'parole', delta: 6, dur: 8, msg: '« Et un grand merci à tous les bénévoles ! » Elle parle plus fort.', say: { who: 'parole', text: 'Merci à tous !' } },
-        { t: 50, type: 'distance', source: 'parole', delta: -10, dur: 8, msg: 'Elle se penche vers le micro pour annoncer la chorale.' }
+        { t: 12, type: 'distance', source: 'parole', delta: 15, dur: 10, msg: 'Christine baisse la tête vers ses notes : sa bouche s’éloigne du micro.', say: { who: 'parole', text: 'Chers parents…' } },
+        { t: 36, type: 'level', source: 'parole', delta: 6, dur: 8, msg: '« Et un grand merci à tous les bénévoles ! » Christine parle plus fort.', say: { who: 'parole', text: 'Merci à tous !' } },
+        { t: 50, type: 'distance', source: 'parole', delta: -10, dur: 8, msg: 'Christine se penche vers le micro pour annoncer la chorale.' }
       ],
       hints: [
-        'Un col de cygne sur le pupitre est fait pour ça (n’oublie pas le 48 V).',
-        'Parole = coupe-bas assez haut (100-150 Hz) : moins de « boum », moins de larsen grave.',
-        'Garde un œil sur la marge avant larsen : une voix parlée demande beaucoup de gain.'
+        { who: 'jerome', text: 'Un col de cygne sur le pupitre, c’est fait pour ça. N’oublie pas le 48 V, sinon rien ne sort.' },
+        { who: 'marc', text: 'Pour la parole, coupe-bas assez haut, 100 à 150 Hz : moins de « boum », moins de larsen dans le grave.' },
+        { who: 'jerome', text: 'Une voix parlée demande beaucoup de gain. Garde un œil sur la marge avant larsen.' }
       ]
     },
     {
-      id: 'chorale', title: 'La chorale des enfants', subtitle: 'Vingt voix, une soliste et un piano', dur: 75,
-      brief: 'Vingt enfants sur les gradins, le professeur au piano droit côté cour. Au milieu du chant, Jade (10 ans) s’avance pour un couplet en solo, puis rejoint le refrain. Les enfants doivent entendre le piano pour chanter juste.',
+      id: 'chorale', title: 'La chorale des enfants', subtitle: 'Vingt voix, une soliste, Lucie au piano', dur: 75,
+      intro: { who: 'lucie', text: 'Je suis au piano pour la chorale. Les enfants doivent m’entendre pour chanter juste, et Jade fait un couplet en solo au milieu.' },
+      brief: 'Vingt enfants sur les gradins, Lucie au piano droit côté cour. Au milieu du chant, Jade (10 ans) s’avance pour un couplet en solo, puis rejoint le refrain. Les enfants doivent entendre le piano pour chanter juste.',
       sources: [
         { id: 'chorale', type: 'chorale', name: 'La chorale', x: 4.2, y: 2.0 },
-        { id: 'piano', type: 'piano', name: 'M. Garnier (piano)', x: 8.4, y: 3.0, look: { shirt: '#2f4f6f', hair: '#9a9a9a', skin: '#e8b48f', style: 'bald' } },
+        { id: 'piano', type: 'piano', name: 'Lucie (piano)', person: 'lucie', x: 8.4, y: 3.0, look: LOOKS.lucie },
         { id: 'soliste', type: 'soliste', name: 'Jade (soliste)', x: 6.3, y: 3.9, look: { shirt: '#d97a2b', hair: '#5a3220', skin: '#c98e66', style: 'long', kid: true } }
       ],
       targets: { ref: 'chorale', mix: { piano: [-3, 3], soliste: [3, 4] }, leq: [70, 82] },
@@ -421,20 +442,21 @@
       events: [
         { t: 14, type: 'level', source: 'chorale', delta: -5, dur: 10, msg: 'Couplet tout doux : la chorale chante pianissimo.' },
         { t: 30, type: 'distance', source: 'soliste', delta: 12, dur: 9, msg: 'Jade est intimidée : elle recule d’un pas devant le micro.', say: { who: 'soliste', text: '(toute timide)' } },
-        { t: 50, type: 'request', who: 'chorale', delta: 4, dur: 25, msg: 'La cheffe de chœur te fait signe : les enfants n’entendent pas assez le piano !', say: { who: 'chorale', text: 'On n’entend pas le piano !' } }
+        { t: 50, type: 'request', who: 'chorale', delta: 4, dur: 25, from: 'lucie', msg: 'Les enfants n’entendent pas assez le piano, monte-le dans leur retour !', say: { who: 'piano', text: 'Plus de piano pour eux !' } }
       ],
       hints: [
-        'Une paire de statiques devant et au-dessus du chœur, à 1-1,5 m. Un micro chant pour Jade.',
-        'Ouvre la voie de Jade juste avant son solo, et coupe-la quand elle ne chante pas : un micro ouvert pour rien, c’est du larsen en plus.',
-        'Un retour face aux enfants avec seulement le piano dedans.'
+        { who: 'marc', text: 'Une paire de statiques devant et au-dessus du chœur, à 1-1,5 m. Un micro chant pour Jade.' },
+        { who: 'jerome', text: 'Ouvre la voie de Jade juste avant son solo, et coupe-la quand elle ne chante pas : un micro ouvert pour rien, c’est du larsen en plus.' },
+        { who: 'marc', text: 'Un retour face aux enfants, avec seulement le piano dedans.' }
       ]
     },
     {
-      id: 'duo', title: 'Duo folk', subtitle: 'Chant et guitare acoustique', dur: 75,
-      brief: 'Inès (16 ans) chante, Hugo l’accompagne à la guitare folk. Sa guitare a un capteur intégré. Le morceau commence par la guitare seule, et finit par Inès a cappella. Les deux veulent un retour.',
+      id: 'duo', title: 'Duo folk', subtitle: 'Inès au chant, le prof de guitare', dur: 75,
+      intro: { who: 'lucie', text: 'Inès chante, accompagnée par le prof de guitare. La guitare a un capteur. Les deux veulent un retour.' },
+      brief: 'Inès (16 ans) chante, le prof de guitare l’accompagne à la guitare folk. La guitare a un capteur intégré. Le morceau commence par la guitare seule, et finit par Inès a cappella.',
       sources: [
         { id: 'voix', type: 'voix', name: 'Inès (chant)', x: 4.4, y: 3.7, look: { shirt: '#3d8b6e', hair: '#1f1712', skin: '#8d5a3b', style: 'curly' } },
-        { id: 'guitare_folk', type: 'guitare_folk', name: 'Hugo (guitare)', x: 6.0, y: 3.5, look: { shirt: '#b8452f', hair: '#c79a4b', skin: '#f1c9a5', style: 'short' } }
+        { id: 'guitare_folk', type: 'guitare_folk', name: 'Prof de guitare', person: 'profGuitare', x: 6.0, y: 3.5, look: LOOKS.profGuitare }
       ],
       targets: { ref: 'voix', mix: { guitare_folk: [-4, 3] }, leq: [76, 88] },
       needs: [
@@ -450,18 +472,53 @@
       ],
       events: [
         { t: 14, type: 'request', who: 'voix', delta: 5, dur: 40, msg: 'Inès pointe son retour du doigt : « Plus de voix ! »', say: { who: 'voix', text: 'Plus de voix !' } },
-        { t: 34, type: 'level', source: 'guitare_folk', delta: 5, dur: 10, msg: 'Solo de guitare : Hugo joue plus fort.' },
+        { t: 34, type: 'level', source: 'guitare_folk', delta: 5, dur: 10, from: 'profGuitare', msg: 'C’est mon solo, je joue plus fort : suis-moi !' },
         { t: 66, type: 'distance', source: 'voix', delta: 15, dur: 8, msg: 'Inès éloigne le micro pour la note tenue finale.' }
       ],
       hints: [
-        'Le retour se place dans la zone morte du micro : pile derrière pour un cardioïde.',
-        'La guitare avec capteur : une DI active, et zéro larsen sur cette voie.',
-        'Quand on te demande plus de retour, regarde la marge avant larsen avant de pousser.'
+        { who: 'jerome', text: 'Le retour se place dans la zone morte du micro : pile derrière pour un cardioïde.' },
+        { who: 'marc', text: 'La guitare a un capteur : une DI active, et zéro larsen sur cette voie.' },
+        { who: 'jerome', text: 'Quand on te demande plus de retour, regarde la marge avant larsen avant de pousser.' }
+      ]
+    },
+    {
+      id: 'profs', title: 'Le morceau des profs', subtitle: 'Flûte, violon, guitare et piano', dur: 80,
+      intro: { who: 'lucie', text: 'Les profs jouent ensemble : flûte traversière, violon, guitare, et moi au piano. Ce sont des instruments doux, sauf le piano. Il va falloir les équilibrer.' },
+      brief: 'Le prof de flûte et le prof de violon jouent le thème chacun leur tour, le prof de guitare et Lucie les accompagnent. Flûte et violon s’entendent peu dans la salle : il faut les renforcer sans que le piano, déjà fort, prenne toute la place.',
+      sources: [
+        { id: 'flute', type: 'flute', name: 'Prof de flûte', person: 'profFlute', x: 3.0, y: 3.6, look: LOOKS.profFlute },
+        { id: 'violon', type: 'violon', name: 'Prof de violon', person: 'profViolon', x: 4.6, y: 3.7, look: LOOKS.profViolon },
+        { id: 'guitare_folk', type: 'guitare_folk', name: 'Prof de guitare', person: 'profGuitare', x: 6.2, y: 3.6, look: LOOKS.profGuitare },
+        { id: 'piano', type: 'piano', name: 'Lucie (piano)', person: 'lucie', x: 8.2, y: 3.0, look: LOOKS.lucie }
+      ],
+      targets: { ref: 'flute', mix: { violon: [0, 3], piano: [-3, 3], guitare_folk: [-4, 3] }, leq: [74, 86] },
+      needs: [
+        { who: 'flute', wants: ['piano'] },
+        { who: 'violon', wants: ['piano'] }
+      ],
+      cues: [
+        { t: 0, label: 'Intro piano', plays: ['piano'] },
+        { t: 8, label: 'Thème à la flûte', plays: ['flute', 'piano'] },
+        { t: 24, label: 'Réponse du violon', plays: ['violon', 'piano'] },
+        { t: 40, label: 'Tous ensemble', plays: ['flute', 'violon', 'guitare_folk', 'piano'] },
+        { t: 56, label: 'Solo guitare', plays: ['guitare_folk', 'piano'] },
+        { t: 66, label: 'Final', plays: ['flute', 'violon', 'guitare_folk', 'piano'] }
+      ],
+      events: [
+        { t: 12, type: 'distance', source: 'flute', delta: 10, dur: 10, msg: 'Le prof de flûte bouge en jouant et s’éloigne du micro.' },
+        { t: 28, type: 'level', source: 'violon', delta: 4, dur: 10, msg: 'Passage forte au violon.' },
+        { t: 44, type: 'request', who: 'violon', delta: 4, dur: 30, from: 'profViolon', msg: 'Je n’entends plus le piano dans mon retour, tu peux m’en remettre ?', say: { who: 'violon', text: 'Plus de piano !' } }
+      ],
+      hints: [
+        { who: 'marc', text: 'Flûte et violon : des statiques petite membrane. Violon au-dessus de l’instrument, flûte vers l’embouchure sans viser le souffle.' },
+        { who: 'jerome', text: 'Le piano s’entend déjà beaucoup dans la salle : très peu de façade dessus.' },
+        { who: 'marc', text: 'Les micros du plateau d’avant sont encore sur scène : range ce qui ne sert plus avant de chercher dans la valise.' }
       ]
     },
     {
       id: 'rock', title: 'L’atelier rock', subtitle: 'Batterie, basse, guitare, clavier, chant', dur: 90,
-      brief: 'Le groupe des ados : Léa au chant (elle adore bouger), batterie, basse, ampli guitare, clavier. Ça démarre par la batterie seule, le clavier n’arrive qu’au refrain. La batterie est déjà forte dans la salle : le chant doit passer par-dessus, sans larsen.',
+      intro: { who: 'lucie', text: 'Les ados de l’atelier rock ! Ça va jouer fort. Léa adore bouger, surveille-la.' },
+      brief: 'Le groupe des ados : Léa au chant, batterie, basse, ampli guitare, clavier. Ça démarre par la batterie seule, le clavier n’arrive qu’au refrain. La batterie est déjà forte dans la salle : le chant doit passer par-dessus, sans larsen.',
       sources: [
         { id: 'voix', type: 'voix', name: 'Léa (chant)', x: 5.0, y: 3.9, look: { shirt: '#c2185b', hair: '#7b2d8b', skin: '#f1c9a5', style: 'long' } },
         { id: 'gc', type: 'gc', name: 'Sam (batterie)', x: 5.0, y: 1.8, look: { shirt: '#222831', hair: '#1f1712', skin: '#c98e66', style: 'short' } },
@@ -494,19 +551,20 @@
         { t: 66, type: 'aim', source: 'voix', target: 'wedge', dur: 8, msg: 'Léa laisse pendre son micro le long du corps… grille pointée vers son retour.' }
       ],
       hints: [
-        'Micro sans fil pour Léa : elle va bouger.',
-        'Grosse caisse : micro spécial dans l’ouverture. Caisse claire : le 57. Basse : DI active.',
-        'Garde la main près du fader du chant : quand un micro se retrouve face à une enceinte, il faut réagir en une seconde.'
+        { who: 'jerome', text: 'Micro sans fil pour Léa : elle va bouger.' },
+        { who: 'marc', text: 'Grosse caisse : le micro spécial dans l’ouverture. Caisse claire : le 57. Basse : DI active.' },
+        { who: 'jerome', text: 'Garde la main près du fader du chant : quand un micro se retrouve face à une enceinte, il faut réagir en une seconde.' }
       ]
     },
     {
       id: 'final', title: 'Le grand final', subtitle: 'Tout le monde sur scène', dur: 90,
-      brief: 'Tout le monde revient pour la chanson de fin : la chorale au fond, Inès au chant, clavier, guitare folk, basse et cajón. La chorale n’entre qu’au refrain, puis chante seule un pont a cappella. Beaucoup de micros ouverts en même temps : c’est là que le larsen guette.',
+      intro: { who: 'christine', text: 'Pour finir, tout le monde revient sur scène. C’est le moment que les parents attendent : il faut que ce soit beau !' },
+      brief: 'Tout le monde revient pour la chanson de fin : la chorale au fond, Inès au chant, Lucie au clavier, le prof de guitare, la basse et le cajón. La chorale n’entre qu’au refrain, puis chante seule un pont a cappella. Beaucoup de micros ouverts en même temps : c’est là que le larsen guette.',
       sources: [
         { id: 'chorale', type: 'chorale', name: 'La chorale', x: 5.0, y: 0.9 },
         { id: 'voix', type: 'voix', name: 'Inès (chant)', x: 5.0, y: 3.9, look: { shirt: '#3d8b6e', hair: '#1f1712', skin: '#8d5a3b', style: 'curly' } },
-        { id: 'clavier', type: 'clavier', name: 'Zoé (clavier)', x: 8.7, y: 3.3, look: { shirt: '#5e60ce', hair: '#2b1b14', skin: '#e8b48f', style: 'bun' } },
-        { id: 'guitare_folk', type: 'guitare_folk', name: 'Hugo (guitare)', x: 2.8, y: 3.4, look: { shirt: '#b8452f', hair: '#c79a4b', skin: '#f1c9a5', style: 'short' } },
+        { id: 'clavier', type: 'clavier', name: 'Lucie (clavier)', person: 'lucie', x: 8.7, y: 3.3, look: LOOKS.lucie },
+        { id: 'guitare_folk', type: 'guitare_folk', name: 'Prof de guitare', person: 'profGuitare', x: 2.8, y: 3.4, look: LOOKS.profGuitare },
         { id: 'basse', type: 'basse', name: 'Malik (basse)', x: 1.6, y: 2.2, look: { shirt: '#4a6741', hair: '#1f1712', skin: '#6b4129', style: 'short' } },
         { id: 'cajon', type: 'cajon', name: 'Sam (cajón)', x: 7.0, y: 2.4, look: { shirt: '#222831', hair: '#1f1712', skin: '#c98e66', style: 'short' } }
       ],
@@ -529,12 +587,12 @@
       events: [
         { t: 30, type: 'level', source: 'chorale', delta: 4, dur: 16, msg: 'Refrain : toute la chorale chante à pleine voix.' },
         { t: 40, type: 'aim', source: 'voix', target: 'wedge', dur: 7, msg: 'Inès applaudit en rythme… le micro pointé vers son retour.' },
-        { t: 64, type: 'request', who: 'chorale', delta: 4, dur: 25, msg: 'Les enfants décrochent : ils n’entendent plus le clavier.', say: { who: 'chorale', text: 'On n’entend rien !' } }
+        { t: 64, type: 'request', who: 'chorale', delta: 4, dur: 25, from: 'lucie', msg: 'Les enfants décrochent, ils n’entendent plus le clavier dans leur retour !', say: { who: 'chorale', text: 'On n’entend rien !' } }
       ],
       hints: [
-        'Pendant le pont a cappella, seule la chorale chante : coupe les autres micros, la chorale aura plus de marge.',
-        'Les micros de la chorale restent assez bas : c’est un renfort.',
-        'Le cajón et la basse n’ont presque pas besoin de façade dans une petite salle.'
+        { who: 'jerome', text: 'Pendant le pont a cappella, seule la chorale chante : coupe les autres micros, la chorale aura plus de marge.' },
+        { who: 'marc', text: 'Les micros de la chorale restent assez bas : c’est un renfort.' },
+        { who: 'marc', text: 'Le cajón et la basse n’ont presque pas besoin de façade dans une petite salle.' }
       ]
     }
   ];
@@ -622,7 +680,7 @@
 
   const api = {
     BANDS, BAND_LABELS, MICS, MIC_ORDER, PATTERNS, SOURCES, SOURCE_ORDER, VENUE,
-    INVENTORY, SCENES, LIMITS, QUIZ, suitability, cueAt
+    INVENTORY, SCENES, PEOPLE, LIMITS, QUIZ, suitability, cueAt
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SonoData = api;

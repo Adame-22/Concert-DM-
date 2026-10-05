@@ -159,7 +159,14 @@
     scene() { return this.state.mode === 'concert' ? D.SCENES[this.state.sceneIdx] : null; },
     canEdit() { return this.state.phase !== 'show'; },
 
-    say(msg, kind, ms) { U.toast($('toasts'), msg, kind, ms); },
+    say(msg, kind, ms, who) { U.toast($('toasts'), msg, kind, ms, who ? D.PEOPLE[who] : null); },
+
+    // une réplique : avatar + nom + texte
+    line(who, text, cls) {
+      const p = D.PEOPLE[who];
+      return h('div', { class: 'line ' + (cls || '') }, U.avatar(p, 'lg'),
+        h('div', { class: 'line-body' }, h('b', { class: 'said-who', style: '--c:' + p.color }, p.name, h('span', { class: 'line-role' }, ' · ' + p.role)), h('p', null, text)));
+    },
 
     changed(what, i) {
       if (what === 'gain' && this.live && this.live.trGain && i === this.ui.selCh) this.live.trGain.setValue(this.state.channels[i].gain);
@@ -197,8 +204,8 @@
       Salle.queueInstall('mic', r.mic.uid);
       const src = E.findSource(this.state, srcId);
       const [sc, note] = D.suitability(src.type, type);
-      if (this.ui.help) this.say((sc >= 3 ? 'Bon choix. ' : sc === 2 ? 'Ça passe. ' : 'Hmm… ') + note, sc >= 2 ? 'ok' : 'warn', 6500);
-      if (D.MICS[type].phantom && this.ui.help) this.say('Voie ' + (r.mic.ch + 1) + ' : pense à activer le 48 V.', 'info');
+      if (this.ui.help) this.say((sc >= 3 ? 'Bon choix. ' : sc === 2 ? 'Ça passe. ' : 'Hmm… ') + note, sc >= 2 ? 'ok' : 'warn', 6500, 'marc');
+      if (D.MICS[type].phantom && this.ui.help) this.say('Voie ' + (r.mic.ch + 1) + ' : pense à activer le 48 V, sinon ce micro reste muet.', 'info', 5200, 'jerome');
       if (S.stock(this.state, type) <= 0 || !this.state.unlimited) this.disarm();
       this.ui.sel = { kind: 'mic', id: r.mic.uid };
       this.ui.selCh = r.mic.ch;
@@ -214,7 +221,7 @@
       this.aimWedge(r.wedge);
       this.disarm();
       this.ui.sel = { kind: 'wedge', id: r.wedge.uid };
-      if (this.ui.help) this.say('Retour posé sur la sortie « Retour ' + (r.wedge.bus + 1) + ' ». Sur la console, choisis RETOUR ' + (r.wedge.bus + 1) + ' pour régler ce qu’il diffuse.', 'info', 6500);
+      if (this.ui.help) this.say('Retour posé sur la sortie « Retour ' + (r.wedge.bus + 1) + ' ». Sur la console, choisis RETOUR ' + (r.wedge.bus + 1) + ' pour régler ce qu’il diffuse.', 'info', 6500, 'marc');
       this.stageChanged(true);
       this.renderInspector();
     },
@@ -347,11 +354,13 @@
       const content = h('div', { class: 'brief' },
         h('div', { class: 'brief-eyebrow' }, 'Plateau ' + (idx + 1) + ' sur ' + D.SCENES.length + ' · ' + sc.dur + ' s de spectacle'),
         h('h2', null, sc.title),
+        idx === 0 ? this.line('jerome', 'Salut ! Marc et moi, on est à la régie avec toi pendant tout le concert, on te parle au talkie. Lucie gère le déroulé de la soirée : écoute-la, elle te prévient avant chaque changement.') : null,
+        sc.intro ? this.line(sc.intro.who, sc.intro.text) : null,
         h('p', { class: 'brief-text' }, sc.brief),
         h('div', { class: 'brief-cols' },
           h('div', null, h('h4', null, 'Sur scène'), h('ul', null, sc.sources.map(s => h('li', null, h('b', null, s.name), ' · ' + D.SOURCES[s.type].name)))),
           h('div', null, h('h4', null, 'Retours demandés'), needs.length ? h('ul', null, needs) : h('p', { class: 'muted' }, 'Aucun.'))),
-        this.ui.help ? h('div', { class: 'brief-hints' }, h('h4', null, 'Conseils du frangin'), h('ul', null, sc.hints.map(t => h('li', null, t)))) : null,
+        this.ui.help ? h('div', { class: 'brief-hints' }, h('h4', null, 'Les conseils de Jérôme et Marc'), h('ul', { class: 'said-list' }, sc.hints.map(t => h('li', null, U.avatar(D.PEOPLE[t.who]), h('span', null, t.text))))) : null,
         h('div', { class: 'brief-steps' },
           h('span', null, 'Pose les micros et les retours'), h('span', null, 'Fais jouer chaque musicien et règle tes gains'), h('span', null, 'Lève le rideau')),
         h('div', { class: 'modal-actions' },
@@ -375,7 +384,7 @@
       };
       this.applyCue();
       this.ui.sel = null;
-      this.say('Rideau ! Le spectacle commence.', 'ok');
+      this.say('Rideau ! C’est à toi.', 'ok', 4000, 'lucie');
       A.applause(2.5);
       this.renderAll();
     },
@@ -412,8 +421,8 @@
         if (ev.type === 'aim' && src) src.aim = ev.target;
         if (ev.type === 'request') sh.reqDelta[ev.who] = (sh.reqDelta[ev.who] || 0) + ev.delta;
         sh.ends.push({ at: ev.t + ev.dur, ev });
-        sh.log.unshift({ t: ev.t, msg: ev.msg });
-        this.say(ev.msg, 'event', 7000);
+        sh.log.unshift({ t: ev.t, msg: ev.msg, from: ev.from });
+        this.say(ev.msg, 'event', 7000, ev.from);
         if (ev.say) this.bubble(ev.say.who, ev.say.text, 4);
         this.stageDirty = true; this.sideDirty = true;
       });
@@ -449,7 +458,7 @@
       if (next && sh.t >= next.t - 3.5 && !sh.warned.has(idx + 1)) {
         sh.warned.add(idx + 1);
         const advice = this.cueAdvice(cue, next);
-        this.say('Dans 3 s : ' + next.label + (this.ui.help && advice ? ' · ' + advice : ''), 'cue', 4200);
+        this.say('Dans 3 s : ' + next.label + (this.ui.help && advice ? ' · ' + advice : ''), 'cue', 4200, 'lucie');
       }
     },
 
@@ -653,20 +662,25 @@
 
     openDebrief(sc, total, scores, tips, prev) {
       const idx = this.state.sceneIdx;
-      const verdict = total >= 85 ? 'Le public n’a rien remarqué : c’est exactement ça, un bon son.'
-        : total >= 65 ? 'Pas mal du tout. Quelques détails à corriger.'
-          : total >= 40 ? 'Le spectacle est passé, mais la salle a souffert par moments.'
-            : 'Aïe. On reprend calmement, un réglage à la fois.';
+      const verdict = total >= 85 ? 'Le public n’a rien remarqué : c’est exactement ça, un bon son. Bravo !'
+        : total >= 65 ? 'Pas mal du tout ! Quelques détails à corriger, Marc t’a tout noté.'
+          : total >= 40 ? 'Le spectacle est passé, mais la salle a souffert par moments. On regarde les notes de Marc et on recommence.'
+            : 'Aïe. Pas de panique : on reprend calmement, un réglage à la fois.';
+      const performer = (sc.sources.find(x => x.person) || {}).person || (sc.intro && sc.intro.who);
+      const react = total >= 75 ? 'Super, on s’entendait bien sur scène, merci pour le son !'
+        : total >= 45 ? 'Ça allait, mais par moments ce n’était pas facile sur scène.'
+          : 'C’était compliqué sur scène… on refait une balance ?';
       const hasNext = idx < D.SCENES.length - 1;
       const content = h('div', { class: 'debrief' },
         h('div', { class: 'brief-eyebrow' }, 'Fin du plateau ' + (idx + 1) + ' · ' + sc.title),
         h('div', { class: 'score-big' }, h('span', { class: 'score-num' }, String(total)), h('span', { class: 'score-of' }, '/100')),
-        h('p', { class: 'brief-text' }, verdict + (prev != null ? ' (meilleur score précédent : ' + prev + ')' : '')),
+        this.line('jerome', verdict + (prev != null ? ' Ton meilleur score sur ce plateau : ' + prev + '.' : '')),
+        performer && performer !== 'jerome' ? this.line(performer, react, 'small') : null,
         h('div', { class: 'score-rows' }, scores.map(s => h('div', { class: 'score-row' },
           h('span', { class: 'score-k' }, s.k),
           h('span', { class: 'score-bar' }, h('i', { style: 'width:' + s.v + '%', class: s.v >= 75 ? 'g' : s.v >= 45 ? 'y' : 'r' })),
           h('span', { class: 'score-v' }, String(s.v))))),
-        tips.length ? h('div', { class: 'brief-hints' }, h('h4', null, 'À retravailler'), h('ul', null, tips.slice(0, 8).map(t => h('li', null, t)))) : h('p', { class: 'muted' }, 'Rien à signaler. Bravo !'),
+        tips.length ? h('div', { class: 'brief-hints' }, h('h4', null, h('span', { class: 'said-who', style: '--c:' + D.PEOPLE.marc.color }, 'Les notes de Marc')), h('ul', null, tips.slice(0, 8).map(t => h('li', null, t)))) : h('p', { class: 'muted' }, 'Rien à signaler. Bravo !'),
         h('div', { class: 'modal-actions' },
           h('button', { class: 'ghost', onclick: () => this.closeModal() }, 'Revoir mes réglages'),
           h('button', { class: hasNext ? 'ghost' : 'primary', onclick: () => { this.closeModal(); this.startShow(); } }, 'Rejouer'),
@@ -720,8 +734,8 @@
           const wd = viaWedge ? st.wedges.find(x => x.uid === fx.spk) : null;
           if (this.ui.help) this.say('LARSEN vers ' + U.fmtHz(D.BANDS[fx.band]) + ' ! ' + (wd
             ? 'Ça boucle par le retour ' + (wd.bus + 1) + ' : coupe la voie ' + (fx.ch + 1) + ' (MUTE) ou baisse son envoi vers ce retour. Le fader façade n’y peut rien.'
-            : 'Baisse vite le fader de la voie ' + (fx.ch + 1) + ' (ou coupe-la).'), 'danger', 5500);
-          else this.say('Ça siffle !', 'danger', 3000);
+            : 'Baisse vite le fader de la voie ' + (fx.ch + 1) + ' (ou coupe-la).'), 'danger', 5500, 'jerome');
+          else this.say('Ça siffle !', 'danger', 3000, 'jerome');
         }
       }
       A.setFeedback(fx.freq, fx.ampDb > -60 ? Math.pow(10, fx.ampDb / 30) : 0);
@@ -799,7 +813,7 @@
         if (this.show && kind === 'quiet' && fx.unheard.length) {
           const s0 = E.findSource(st, fx.unheard[0]);
           const ch = st.mics.find(m => m.sourceId === fx.unheard[0]);
-          this.say('Le public n’entend pas ' + (s0 ? s0.name : '') + (ch && this.ui.help ? ' : sa voie ' + (ch.ch + 1) + ' est fermée.' : '.'), 'warn', 4000);
+          this.say('Le public n’entend pas ' + (s0 ? s0.name : '') + (ch && this.ui.help ? ' : la voie ' + (ch.ch + 1) + ' est fermée.' : '.'), 'warn', 4000, 'marc');
         }
       }
     },
@@ -885,7 +899,7 @@
         wrap.appendChild(h('ul', { class: 'mus-list' }, st.sources.map(s => this.musicianRow(s))));
         wrap.appendChild(h('h4', null, 'Ce qui se passe'));
         const log = h('ol', { class: 'event-log' });
-        for (const e of this.show.log) log.appendChild(h('li', null, h('span', { class: 'ev-t' }, Math.round(e.t) + ' s'), e.msg));
+        for (const e of this.show.log) log.appendChild(h('li', null, h('span', { class: 'ev-t' }, Math.round(e.t) + ' s'), h('span', null, e.from ? h('b', { class: 'said-who', style: '--c:' + D.PEOPLE[e.from].color }, D.PEOPLE[e.from].name + ' : ') : null, e.msg)));
         if (!this.show.log.length) log.appendChild(h('li', { class: 'muted' }, 'Pour l’instant, tout va bien.'));
         wrap.appendChild(log);
         return wrap;
@@ -916,7 +930,7 @@
         wrap.appendChild(ul);
         this.live.needs = ul;
       }
-      if (this.ui.help) wrap.appendChild(h('div', { class: 'hint-box' }, h('h4', null, 'Conseils'), h('ul', null, sc.hints.map(x => h('li', null, x)))));
+      if (this.ui.help) wrap.appendChild(h('div', { class: 'hint-box' }, h('h4', null, 'Conseils de Jérôme et Marc'), h('ul', { class: 'said-list' }, sc.hints.map(x => h('li', null, U.avatar(D.PEOPLE[x.who]), h('span', null, x.text))))));
       wrap.appendChild(h('div', { class: 'panel-actions' },
         h('button', { class: 'btn-text', onclick: () => this.openBrief() }, 'Relire le brief'),
         h('button', { class: 'primary', onclick: () => this.startShow() }, 'Lever le rideau')));

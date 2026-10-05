@@ -633,3 +633,23 @@ body.larsen .stage-wrap { box-shadow: 0 0 0 2px var(--led-r), 0 0 30px rgba(255,
   .cue-seg span { display: none; }
   .mood { min-width: 0; }
 }
+
+/* ------------------------------------------------------------ Les gens du concert */
+.avatar {
+  flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--c); color: var(--chassis); font-family: var(--f-label); font-weight: 700; font-size: 13px; line-height: 1;
+  box-shadow: 0 0 0 2px var(--chassis-2);
+}
+.avatar.lg { width: 40px; height: 40px; font-size: 19px; }
+.said-who { color: var(--c); font-weight: 600; }
+.toast.said { display: flex; gap: 10px; align-items: flex-start; }
+.said-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.said-body .said-who { font-size: 12.5px; letter-spacing: 0.02em; }
+.line { display: flex; gap: 12px; align-items: flex-start; }
+.line-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; background: var(--chassis-3); border-radius: 4px 10px 10px 10px; padding: 8px 12px; }
+.line-body p { margin: 0; font-size: 15.5px; }
+.line-role { color: var(--silk-dim); font-weight: 400; font-size: 13px; }
+.line.small .line-body p { font-size: 14.5px; }
+.said-list { list-style: none !important; padding-left: 0 !important; }
+.said-list li { display: flex; gap: 8px; align-items: flex-start; }
+.said-list li .avatar { margin-top: 1px; }
