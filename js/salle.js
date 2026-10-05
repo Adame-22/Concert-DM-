@@ -1315,6 +1315,27 @@
       this.tagQueue = [];
     },
 
+    // ------------------------------------------------------------ Dessin réutilisable (mini-scènes du parcours)
+    // Dessine dans un autre canvas avec les mêmes bonhommes et instruments.
+    withCtx(ctx, t, fn) {
+      const saveCtx = this.ctx, saveT = this.t;
+      this.ctx = ctx; this.t = t;
+      try { fn(); } finally { this.ctx = saveCtx; this.t = saveT; }
+    },
+    puppet(ctx, t, x, y, k, look, pose) {
+      this.withCtx(ctx, t, () => this.drawPerson(x, y, k, look, pose, t, () => {}));
+    },
+    prop(ctx, t, kind, x, y, k, playing) {
+      const g = () => {};
+      this.withCtx(ctx, t, () => {
+        if (kind === 'kick') this.drawKick([x, y, k], k, g, playing, t);
+        else if (kind === 'piano') this.drawPiano([x, y, k], k, g);
+        else if (kind === 'keyboard') this.drawKeyboard([x, y, k], k, g);
+        else if (kind === 'amp') this.drawAmp(x, y, k, g, playing, 0.8);
+        else if (kind === 'cymbals') this.drawCymbals([x, y, k], k, g, playing, t);
+      });
+    },
+
     // ------------------------------------------------------------ Interactions
     pick(sx, sy) {
       for (let i = this.hits.length - 1; i >= 0; i--) {

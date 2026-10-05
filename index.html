@@ -16,6 +16,7 @@
     <span class="brand-sub">Concert Destination Musique</span>
   </div>
   <nav class="tabs" role="tablist" aria-label="Sections">
+    <button data-view="parcours" role="tab" aria-selected="false">Apprendre</button>
     <button data-view="concert" class="on" role="tab" aria-selected="true">Le concert</button>
     <button data-view="atelier" role="tab" aria-selected="false">Atelier libre</button>
     <button data-view="oreille" role="tab" aria-selected="false">Oreille</button>
@@ -34,7 +35,13 @@
 </header>
 
 <main>
+  <section id="view-parcours" class="view-parcours" hidden></section>
+
   <section id="view-sim" class="view-sim">
+    <div class="phone-note">
+      <p>Le concert complet se joue mieux sur ordinateur ou tablette, téléphone à l’horizontale au minimum. Sur téléphone, commence par les leçons.</p>
+      <button id="go-parcours" class="primary">Apprendre</button>
+    </div>
     <div class="sim-top">
       <div class="stage-wrap">
         <div class="stage-head">
@@ -98,6 +105,7 @@
 <script src="js/ui.js"></script>
 <script src="js/stage.js"></script>
 <script src="js/salle.js"></script>
+<script src="js/parcours.js"></script>
 <script src="js/mixer.js"></script>
 <script src="js/learn.js"></script>
 <script src="js/game.js"></script>

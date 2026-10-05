@@ -71,10 +71,15 @@
       this.renderSceneSelect();
       this.renderAll();
       if (root.SonoLearn) root.SonoLearn.init(this);
+      if (root.SonoParcours) root.SonoParcours.init(this);
+      $('go-parcours').addEventListener('click', () => this.switchView('parcours'));
       setInterval(() => this.tick(), TICK);
       const hash = (location.hash || '').replace('#', '');
-      if (['atelier', 'oreille', 'quiz', 'fiches'].includes(hash)) this.switchView(hash);
-      else this.openBrief();
+      const firstTime = !Object.keys(U.store.get('parcours', {})).length;
+      const narrow = root.innerWidth < 720;
+      if (['concert', 'atelier', 'parcours', 'oreille', 'quiz', 'fiches'].includes(hash)) this.switchView(hash);
+      else if (firstTime || narrow) this.switchView('parcours');
+      else this.switchView('concert');
     },
 
     makeAtelier() {
@@ -100,7 +105,10 @@
       });
       const sim = v === 'concert' || v === 'atelier';
       $('view-sim').hidden = !sim;
-      ['oreille', 'quiz', 'fiches'].forEach(k => { $('view-' + k).hidden = v !== k; });
+      ['parcours', 'oreille', 'quiz', 'fiches'].forEach(k => { $('view-' + k).hidden = v !== k; });
+      if (v !== 'parcours' && root.SonoParcours) root.SonoParcours.leave();
+      if (v === 'parcours' && root.SonoParcours) root.SonoParcours.show();
+      try { root.scrollTo(0, 0); } catch (e) { /* ignore */ }
       if (sim) {
         if (this.show && this.state.mode !== v) this.abortShow();
         this.fx.clapUntil = 0;
@@ -110,23 +118,30 @@
         document.body.dataset.mode = v;
         this.renderSceneSelect();
         this.renderAll();
+        if (v === 'concert' && !this.briefShown) { this.briefShown = true; this.openBrief(); }
       } else {
         this.fx.ampDb = -80;
         document.body.classList.remove('larsen');
         A.setFeedback(1000, 0);
-        if (root.SonoLearn) root.SonoLearn.show(v);
+        if (root.SonoLearn && v !== 'parcours') root.SonoLearn.show(v);
       }
       if (this.ui.armed) this.disarm();
       if (v !== 'oreille' && root.SonoLearn) root.SonoLearn.stopEar();
+    },
+
+    syncSoundButton() {
+      const btn = $('btn-sound');
+      const on = !!A.ctx && A.enabled;
+      btn.classList.toggle('on', on);
+      btn.textContent = on ? 'Son activé' : A.ctx ? 'Son coupé' : 'Activer le son';
+      btn.setAttribute('aria-pressed', String(on));
     },
 
     toggleSound() {
       const btn = $('btn-sound');
       if (!A.ctx) {
         A.init();
-        btn.classList.add('on');
-        btn.textContent = 'Son activé';
-        btn.setAttribute('aria-pressed', 'true');
+        this.syncSoundButton();
         return;
       }
       const on = !A.enabled;

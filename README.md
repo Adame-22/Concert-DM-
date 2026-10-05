@@ -8,10 +8,13 @@ régler les gains, placer les retours, éviter le larsen, équilibrer le mix pou
 Aucune installation : ouvre `index.html` dans Chrome, Firefox, Safari ou Edge (double-clic).
 Clique sur **Activer le son** en haut pour entendre les larsens, les saturations et les exercices d’oreille.
 
+Sur téléphone, commence par l’onglet **Apprendre**. Le concert complet (console 16 voies, vue salle) est fait pour un ordinateur ou une tablette.
+
 ## Ce qu’il y a dedans
 
 | Onglet | À quoi ça sert |
 | --- | --- |
+| **Apprendre** | Le point de départ, pensé pour le téléphone : 7 mini-leçons de 2 minutes, une notion à la fois (le bon micro, brancher et le 48 V, le gain, placer les retours, le larsen, ouvrir et couper au bon moment, le mélange). Gros boutons, Jérôme et Marc qui guident, des étoiles à gagner. Le larsen et les retours y sont calculés avec le vrai moteur physique. |
 | **Le concert** | Les 6 plateaux de la soirée : mot d’accueil, chorale + soliste + piano, duo folk, morceau des profs (flûte, violon, guitare, piano), atelier rock, grand final. Pour chacun : tu poses les micros et les retours, tu fais jouer les musiciens pour régler tes gains, puis tu lèves le rideau. Chaque morceau suit un **conducteur** (intro guitare seule, solo de la soliste, pont a cappella…) : à toi d’ouvrir et de couper les bonnes voies au bon moment. Pendant le spectacle il se passe des choses (la chanteuse descend dans le public, le micro pointe vers le retour, une enfant intimidée recule…). À la fin : une note sur 100 et la liste de ce qu’il faut retravailler. |
 | **Atelier libre** | Matériel illimité, pas de chrono. Ajoute n’importe quel instrument et regarde l’effet de chaque réglage sur la marge avant larsen. |
 | **Oreille** | Reconnaître la fréquence d’un larsen, et l’éteindre le plus vite possible sur l’EQ graphique. |
@@ -80,6 +83,7 @@ js/stage.js       plan de scène vu de dessus (SVG)
 js/salle.js       vue salle animée (canvas) : bonhommes, technicien, câbles, public
 js/mixer.js       console 16 voies + façade + 4 retours, EQ graphique
 js/learn.js       fiches, quiz, oreille
+js/parcours.js    les mini-leçons « Apprendre »
 js/game.js        déroulé du concert, notes, panneaux
 tests/            tests du moteur : `npm test` (Node 18+)
 ```
