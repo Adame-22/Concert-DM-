@@ -1,0 +1,10 @@
+{
+  "name": "sono-sim",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simulateur pédagogique de sonorisation pour le concert de l’école Destination Musique",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "UNLICENSED"
+}

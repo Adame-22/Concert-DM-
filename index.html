@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sono Sim · Destination Musique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Permanent+Marker&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-mode="concert" data-phase="prep">
+<header class="topbar">
+  <div class="brand">
+    <span class="tape brand-tape">SONO SIM</span>
+    <span class="brand-sub">Concert Destination Musique</span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button data-view="concert" class="on" role="tab" aria-selected="true">Le concert</button>
+    <button data-view="atelier" role="tab" aria-selected="false">Atelier libre</button>
+    <button data-view="oreille" role="tab" aria-selected="false">Oreille</button>
+    <button data-view="quiz" role="tab" aria-selected="false">Quiz</button>
+    <button data-view="fiches" role="tab" aria-selected="false">Fiches</button>
+  </nav>
+  <div class="top-tools">
+    <label class="switch" title="Mode apprentissage : analyseur, conseils et zones cibles visibles">
+      <input type="checkbox" id="opt-help" checked>
+      <span class="switch-track" aria-hidden="true"></span>
+      <span class="switch-label">Aide</span>
+    </label>
+    <button id="btn-sound" class="btn-sound" aria-pressed="false">Activer le son</button>
+    <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5" aria-label="Volume des sons du simulateur">
+  </div>
+</header>
+
+<main>
+  <section id="view-sim" class="view-sim">
+    <div class="sim-top">
+      <div class="stage-wrap">
+        <div class="stage-head">
+          <div class="scene-id">
+            <span id="phase-pill" class="pill">Préparation</span>
+            <div class="scene-names">
+              <h1 id="scene-title">Mot d’accueil</h1>
+              <span id="scene-sub" class="scene-sub"></span>
+            </div>
+            <label class="sr-only" for="scene-select">Choisir le plateau</label>
+            <select id="scene-select" class="scene-select"></select>
+          </div>
+          <div class="hud">
+            <div id="larsen-led" class="larsen-led" title="Témoin de larsen"><i></i>LARSEN</div>
+            <div id="spl" class="spl" title="Sonomètre à la régie (niveau moyen au public)"><span id="spl-val">—</span><small>dB</small></div>
+            <span id="show-time" class="show-time"></span>
+            <button id="btn-phase" class="primary">Lever le rideau</button>
+          </div>
+        </div>
+        <div id="show-progress" class="show-progress" hidden><i></i></div>
+        <div class="stage-box">
+          <svg id="stage" class="stage" role="application" aria-label="Plan de scène vu de dessus"></svg>
+          <div id="armed-hint" class="armed-hint" hidden><span id="armed-text"></span><button class="btn-text" onclick="SonoGame.disarm()">Annuler</button></div>
+          <div id="toasts" class="toasts" aria-live="polite"></div>
+          <div id="inspector" class="inspector" hidden></div>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="side-tabs" role="tablist" aria-label="Panneau">
+          <button data-tab="scene" class="on" role="tab" aria-selected="true">Scène</button>
+          <button data-tab="valise" role="tab" aria-selected="false">Valise</button>
+          <button data-tab="tranche" role="tab" aria-selected="false">Tranche</button>
+          <button data-tab="analyse" role="tab" aria-selected="false">Analyse</button>
+        </div>
+        <div id="side-body" class="side-body"></div>
+      </aside>
+    </div>
+    <div id="console" class="console" aria-label="Console de mixage"></div>
+  </section>
+
+  <section id="view-oreille" class="view-learn" hidden></section>
+  <section id="view-quiz" class="view-learn" hidden></section>
+  <section id="view-fiches" class="view-learn" hidden></section>
+</main>
+
+<div id="geq-sheet" class="sheet" hidden></div>
+<div id="modal" class="modal" hidden><div id="modal-box" class="modal-box" role="dialog" aria-modal="true"></div></div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/state.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/stage.js"></script>
+<script src="js/mixer.js"></script>
+<script src="js/learn.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
