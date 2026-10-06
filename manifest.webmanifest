@@ -1,7 +1,7 @@
 {
-  "name": "Sono Sim · Destination Musique",
+  "name": "Sono Sim",
   "short_name": "Sono Sim",
-  "description": "Apprendre la sono en jouant, pour le concert de l’école Destination Musique.",
+  "description": "Apprendre la sono en jouant.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#13161a",

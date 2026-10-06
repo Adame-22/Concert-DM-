@@ -1000,7 +1000,7 @@
     panelValise() {
       const st = this.state;
       const wrap = h('div', { class: 'panel' });
-      wrap.appendChild(h('h3', null, st.unlimited ? 'Matériel (illimité)' : 'La valise de l’école'));
+      wrap.appendChild(h('h3', null, st.unlimited ? 'Matériel (illimité)' : 'La valise'));
       wrap.appendChild(h('p', { class: 'muted' }, 'Choisis un micro, puis clique sur le musicien. Les micros restent en place d’un plateau à l’autre, comme en vrai.'));
       const list = h('ul', { class: 'case-list' });
       for (const type of D.MIC_ORDER) {

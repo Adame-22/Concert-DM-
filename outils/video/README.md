@@ -1,7 +1,7 @@
 # Vidéo de présentation
 
 La vidéo de présentation de Sono Sim (2 min 20, 1080p) est filmée directement dans l’appli :
-le script ouvre l’appli dans un cadre d’ordinateur et de téléphone, joue les actions (poser le micro de Christine,
+le script ouvre l’appli dans un cadre d’ordinateur et de téléphone, joue les actions (poser un micro au pupitre,
 lever le rideau, provoquer un larsen…), filme l’écran, compose une musique originale calée sur les plans, puis assemble le tout.
 
 ```

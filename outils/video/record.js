@@ -114,20 +114,20 @@ const BASE = ROOT + 'outils/video/';
   await sleep(2600); await mark('titre'); await sleep(3600);
 
   // 2. Le problème
-  await p.evaluate(() => { P.layer('problem'); P.problem('Chaque année, le concert de l’école <em>passe par la régie son.</em><small>Micros, retours, larsen : si le son ne suit pas, c’est toute la soirée qui en pâtit.</small>'); });
+  await p.evaluate(() => { P.layer('problem'); P.problem('Un concert, ça se joue aussi <em>à la régie son.</em><small>Micros, retours, larsen : si le son ne suit pas, c’est toute la soirée qui en pâtit.</small>'); });
   await sleep(2200); await mark('probleme'); await sleep(3200);
-  await p.evaluate(() => P.problem('Et ce savoir-faire tient <em>dans très peu de mains.</em><small>Cette année, il faut former quelqu’un. Vite, et bien.</small>'));
+  await p.evaluate(() => P.problem('Et le son, ça s’apprend <em>souvent sur le tas.</em><small>Le soir même, sans droit à l’erreur.</small>'));
   await sleep(5200);
-  await p.evaluate(() => P.problem('Et si on pouvait <em>s’entraîner avant&nbsp;?</em><small>Sans matériel, sans salle, sans risque pour le concert.</small>'));
+  await p.evaluate(() => P.problem('Et si on pouvait <em>s’entraîner avant&nbsp;?</em><small>Sans matériel, sans salle, sans risque.</small>'));
   await sleep(4600);
 
-  // 3. Le concert : Christine au pupitre
-  await p.evaluate(() => { P.layer('demo'); P.cap('Le concert', 1, 'Le vrai concert, <em>en répétition</em>', 'Les <b>6 plateaux</b> de la soirée, avec celles et ceux qui y jouent : Christine, Lucie, les profs, les élèves.'); });
+  // 3. Le concert : le discours au pupitre (briefing fermé hors champ)
+  await app.evaluate(() => { SonoGame.closeModal(); SonoGame.setSideTab('scene'); });
+  await p.evaluate(() => { P.layer('demo'); P.cap('Le concert', 1, 'Un concert entier, <em>en répétition</em>', '<b>6 plateaux</b>, du discours d’ouverture au grand final : voix, chorale, piano, guitares, groupe rock.'); });
   await sleep(2400); await mark('brief'); await sleep(2600);
-  await tapEl(app, '#app', '#modal .primary');
+  await tapEl(app, '#app', '.side-tabs [data-tab="valise"]');
   await sleep(900);
-  await app.evaluate(() => SonoGame.setSideTab('valise'));
-  await p.evaluate(() => P.cap('Le concert', 1, 'Christine ouvre la soirée : <em>quel micro&nbsp;?</em>', 'On le choisit dans la valise de l’école, on désigne la personne : <b>le technicien l’installe sous tes yeux.</b>'));
+  await p.evaluate(() => P.cap('Le concert', 1, 'Un discours au pupitre : <em>quel micro&nbsp;?</em>', 'On le choisit dans la valise, on désigne la personne : <b>le technicien l’installe sous tes yeux.</b>'));
   await sleep(1200);
   await tapEl(app, '#app', '.case-item[data-type="col"]');
   await sleep(700);
@@ -145,13 +145,13 @@ const BASE = ROOT + 'outils/video/';
   await app.evaluate((c) => { const st = SonoGame.state; st.mics.forEach(m => { m.dist = 15; }); st.channels[c].hpf = true; st.sources.forEach(s => { s.playing = true; s.dyn = 0; }); window.__setGain(c, -20); st.channels[c].fader = -12; SonoMixer.refresh(); SonoGame.sideDirty = true; SonoGame.stageDirty = true; }, chC);
   await sleep(900);
   await tapEl(app, '#app', '#btn-phase');
-  await p.evaluate(() => P.cap('Le concert', 1, 'Rideau&nbsp;! <em>La salle réagit</em> en direct', 'Le public, les musiciens, Lucie au déroulé, Jérôme et Marc au talkie : <b>chaque réglage a un effet visible.</b>'));
+  await p.evaluate(() => P.cap('Le concert', 1, 'Rideau&nbsp;! <em>La salle réagit</em> en direct', 'Le public, les musiciens, les mentors au talkie : <b>chaque réglage a un effet visible.</b>'));
   await moveTo({ x: 1700, y: 1150 }, false, 300);
   await sleep(2600); await mark('rideau'); await sleep(3200);
 
   // 4. Les profs, de près
   await app.evaluate(() => { SonoGame.abortShow(); SonoGame.closeModal(); SonoGame.state.mics.slice().forEach(m => SonoState.removeMic(SonoGame.state, m.uid)); SonoGame.gotoScene(3); SonoGame.closeModal(); window.__solveProfs(); SonoGame.startShow(); SonoGame.show.t = 37.5; SonoGame.show.fired.add(0); SonoGame.show.fired.add(1); document.getElementById('toasts').innerHTML = ''; });
-  await p.evaluate(() => { P.capHide(true); P.device('translate(12px,-205px) scale(1.5)'); P.lower('Le morceau des profs : <b>Lucie au piano</b>, les profs de flûte, de violon et de guitare.'); });
+  await p.evaluate(() => { P.capHide(true); P.device('translate(12px,-205px) scale(1.5)'); P.lower('Flûte, violon, guitare et piano : <b>chaque instrument a son micro</b>, chaque musicien son retour.'); });
   await sleep(3000); await mark('profs'); await sleep(4600);
   await p.evaluate(() => P.lower('Chaque morceau suit son <b>conducteur</b> : qui joue, quand ouvrir et couper chaque micro.'));
   await sleep(4400);
@@ -172,14 +172,14 @@ const BASE = ROOT + 'outils/video/';
   }
   await sleep(1400); await mark('larsen'); await sleep(2600);
   await app.evaluate(() => { const st = SonoGame.state; const c = st.channels[0]; c.mute = true; SonoMixer.refresh(); });
-  await p.evaluate(() => P.cap('Le larsen', 2, 'Couper, <em>puis comprendre</em>', 'Jérôme et Marc expliquent ce qui a sifflé, sur quelle fréquence, et comment le corriger.'));
+  await p.evaluate(() => P.cap('Le larsen', 2, 'Couper, <em>puis comprendre</em>', 'Les mentors expliquent ce qui a sifflé, sur quelle fréquence, et comment le corriger.'));
   await sleep(1500);
   await app.evaluate(() => { const c = SonoGame.state.channels[0]; const b = window.__bak; c.gain = b.gain; c.fader = b.fader; c.sends = b.sends.slice(); c.mute = false; SonoMixer.refresh(); });
   await sleep(3600);
 
   // 6. La console 48 voies
   await app.evaluate(() => { SonoGame.abortShow(); SonoGame.closeModal(); document.getElementById('toasts').innerHTML = ''; });
-  await p.evaluate(() => P.cap('La console', 3, 'Une table <em>48 voies</em>, comme celle de l’école', 'Gain, 48 V, coupe-bas, égaliseur, façade et <b>4 retours</b> : les mêmes gestes que le soir du concert.'));
+  await p.evaluate(() => P.cap('La console', 3, 'Une vraie table <em>48 voies</em>', 'Gain, 48 V, coupe-bas, égaliseur, façade et <b>4 retours</b> : les mêmes gestes que le soir du concert.'));
   await app.evaluate(() => { const c = document.getElementById('console'); window.scrollTo({ top: c.getBoundingClientRect().top + window.scrollY - 60, behavior: 'smooth' }); });
   await sleep(1800); await mark('console');
   await tapEl(app, '#app', '.bank-bar .bank-btn:nth-child(3)'); await sleep(900);
@@ -191,7 +191,7 @@ const BASE = ROOT + 'outils/video/';
 
   // 7. Sur téléphone : les leçons
   await moveTo({ x: 1700, y: 1150 }, true, 200);
-  await p.evaluate(() => { P.devShow(false); P.phoneShow(true); P.cap('Apprendre', 4, 'Dans la poche, <em>2 minutes par leçon</em>', '7 mini-leçons sur téléphone, une notion à la fois, avec Jérôme et Marc.', ['Choisir le bon micro', 'Brancher, et le piège du 48 V', 'Régler le gain', 'Placer les retours', 'Comprendre et stopper le larsen'], true); });
+  await p.evaluate(() => { P.devShow(false); P.phoneShow(true); P.cap('Apprendre', 4, 'Dans la poche, <em>2 minutes par leçon</em>', '7 mini-leçons sur téléphone, une notion à la fois, avec deux mentors qui guident.', ['Choisir le bon micro', 'Brancher, et le piège du 48 V', 'Régler le gain', 'Placer les retours', 'Comprendre et stopper le larsen'], true); });
   await sleep(2400); await mark('lecons');
   await tapEl(phone, '#phoneapp', '.pc-node.next', true); await sleep(900);
   await tapEl(phone, '#phoneapp', '.pc-go', true); await sleep(1600);

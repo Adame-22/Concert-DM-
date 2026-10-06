@@ -1,5 +1,5 @@
 /* Sono Sim — fonctionne sans réseau (le jour J, la salle n’a pas toujours de wifi). */
-const CACHE = 'sonosim-v4';
+const CACHE = 'sonosim-v5';
 const FILES = ['./', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg',
   './js/data.js', './js/engine.js', './js/state.js', './js/audio.js', './js/music.js', './js/ui.js', './js/stage.js',
   './js/salle.js', './js/parcours.js', './js/mixer.js', './js/learn.js', './js/questions.js', './js/quiz.js', './js/coach.js', './js/game.js'];

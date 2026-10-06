@@ -97,7 +97,7 @@
         '<li><b>Couper les micros qui ne servent pas.</b> Deux micros ouverts au lieu d’un : 3 dB de marge perdus.</li>' +
         '<li><b>Coupe-bas sur tout ce qui n’est pas basse ou grosse caisse.</b></li>' +
         '<li><b>Égaliser le système.</b> Sur l’EQ graphique, creuser de 3 à 6 dB la bande qui siffle en premier.</li>' +
-        '<li><b>Baisser un peu.</b> Un concert d’école n’a pas besoin d’être fort.</li></ol>' +
+        '<li><b>Baisser un peu.</b> Un petit concert n’a pas besoin d’être fort.</li></ol>' +
         '<h4>Repérer la fréquence</h4><p>À l’oreille : un sifflement aigu vers 2-4 kHz, un « ouuu » médium vers 500 Hz-1 kHz, un ronflement vers 125-250 Hz. Entraîne-toi dans l’onglet Oreille.</p>'
     },
     {
@@ -114,7 +114,7 @@
     },
     {
       id: 'choix', title: 'Quel micro pour quoi',
-      html: () => '<p>Tableau tiré du simulateur. Les modèles cités sont les plus courants : si l’école a d’autres marques, cherche l’équivalent (dynamique, statique, directivité).</p>' + micTable()
+      html: () => '<p>Tableau tiré du simulateur. Les modèles cités sont les plus courants : si ton matériel est d’une autre marque, cherche l’équivalent (dynamique, statique, directivité).</p>' + micTable()
     },
     {
       id: 'patch', title: 'Le patch et le conducteur',
@@ -210,7 +210,7 @@
         }
         body.appendChild(sec);
       });
-      el.append(h('div', { class: 'learn-head' }, h('h1', null, 'Fiches'), h('p', null, 'L’essentiel pour tenir la console d’un concert d’école. À relire la veille.')), h('div', { class: 'fiche-layout' }, nav, body));
+      el.append(h('div', { class: 'learn-head' }, h('h1', null, 'Fiches'), h('p', null, 'L’essentiel pour tenir la console d’un concert. À relire la veille.')), h('div', { class: 'fiche-layout' }, nav, body));
     },
 
     // ------------------------------------------------------------ Quiz

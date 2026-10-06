@@ -1,6 +1,6 @@
-# Sono Sim · Concert Destination Musique
+# Sono Sim
 
-Simulateur pédagogique pour apprendre à sonoriser un concert d’école : choisir et placer les micros,
+Simulateur pédagogique pour apprendre à sonoriser un concert : choisir et placer les micros,
 régler les gains, placer les retours, éviter le larsen, équilibrer le mix pour le public.
 
 ## Lancer
@@ -71,7 +71,7 @@ Le simulateur ne remplace pas la formation sur le vrai matériel : il sert à co
 
 Tout se règle dans `js/data.js` :
 
-- `INVENTORY` : remplace par la liste réelle du matériel de l’école (combien de 58, de statiques, de DI, de retours…).
+- `INVENTORY` : remplace par la liste réelle de ton matériel (combien de 58, de statiques, de DI, de retours…).
 - `SCENES` : le vrai programme de la soirée (qui joue, où sur scène, le conducteur de chaque morceau, ce que chacun veut dans son retour, les événements, l’apparence des bonhommes).
 - `VENUE` : position des enceintes de façade, distance de la régie, réverbération de la salle.
 - `MICS` / `SOURCES` : ajouter un micro ou un instrument.

@@ -115,14 +115,14 @@
     ['.scribble', 'marc', 'Le bout de gaffer : on écrit au marqueur qui est sur chaque voie. Indispensable pour ne pas chercher le jour J.'],
     ['.layer-btn', 'jerome', 'Choisis ce que règlent les faders : la FAÇADE (le public) ou un RETOUR (ce qu’entend un musicien sur scène).'],
     ['.bank-btn', 'marc', 'La console a 48 voies mais 16 faders : comme sur une console numérique, on passe d’une banque de 16 à l’autre.'],
-    ['#spl', 'jerome', 'Le sonomètre : le niveau sonore au fond de la salle. Pour un concert d’école, vise 80-90 dB. Jamais plus de 102.'],
+    ['#spl', 'jerome', 'Le sonomètre : le niveau sonore au fond de la salle. Pour un petit concert, vise 80-90 dB. Jamais plus de 102.'],
     ['#mood', 'marc', 'La réaction du public : il adore, il n’entend pas, c’est trop fort, ou il se bouche les oreilles au larsen.'],
     ['#larsen-led', 'jerome', 'Ce témoin s’allume quand il y a du larsen. Si ça arrive : baisse ou coupe la voie tout de suite.'],
     ['#cue-bar', 'marc', 'Le conducteur : qui joue, et quand. Le trait rouge avance pendant le spectacle. Anticipe les entrées pour ouvrir les bonnes voies.'],
     ['#btn-phase', 'jerome', 'Quand tout est prêt, lève le rideau : le public entre et le spectacle commence. Les musiciens jouent selon le conducteur.'],
     ['.view-toggle', 'marc', 'Vue salle : la scène comme depuis la régie. Plan : la vue de dessus, plus technique, pour placer précisément.'],
     ['.case-item', 'marc', (el) => { const t = el.dataset.type; const d = t && D.MICS[t]; return d ? d.name + ' (' + d.model + ') : ' + d.desc : 'Un retour de scène : une enceinte au sol, face au musicien, pour qu’il s’entende.'; }],
-    ['.side-tabs [data-tab]', 'marc', (el) => ({ scene: 'Scène : les musiciens, le conducteur et la liste des choses à faire.', valise: 'Valise : le matériel de l’école. Choisis un micro, puis touche le musicien.', patch: 'Patch : quel micro est branché sur quelle prise du boîtier, donc sur quelle voie.', tranche: 'Tranche : tous les réglages d’une voie (égaliseur, envois aux retours).', analyse: 'Analyse : la marge avant larsen et ce qu’entend le public.' })[el.dataset.tab]],
+    ['.side-tabs [data-tab]', 'marc', (el) => ({ scene: 'Scène : les musiciens, le conducteur et la liste des choses à faire.', valise: 'Valise : le matériel disponible. Choisis un micro, puis touche le musicien.', patch: 'Patch : quel micro est branché sur quelle prise du boîtier, donc sur quelle voie.', tranche: 'Tranche : tous les réglages d’une voie (égaliseur, envois aux retours).', analyse: 'Analyse : la marge avant larsen et ce qu’entend le public.' })[el.dataset.tab]],
     ['.play-btn', 'marc', 'Fais jouer ou taire ce musicien pendant la balance, pour régler sa voie tout seul.'],
     ['.mood', 'marc', 'La réaction du public.']
   ];

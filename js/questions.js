@@ -85,7 +85,7 @@
     { cat: 'jourj', lvl: 2, type: 'qcm', q: 'Pourquoi scotcher les câbles au sol ?', a: ['Pour que personne ne trébuche', 'Pour le son', 'Pour le larsen', 'C’est joli'], ok: 0, why: 'Sécurité d’abord, surtout avec des enfants sur scène.' },
     { cat: 'jourj', lvl: 2, type: 'tf', q: 'Brancher un micro avec le 48 V allumé et le fader monté peut faire un gros « clac » dans les enceintes.', ok: true, why: 'Fader en bas, 48 V coupé, puis on branche.' },
     { cat: 'jourj', lvl: 3, type: 'qcm', q: 'Pendant le concert, où gardes-tu ta main ?', a: ['Près du fader du chant', 'Sur le master', 'Sur le 48 V', 'Dans ta poche'], ok: 0, why: 'C’est la voie la plus fragile : c’est elle qui part en larsen ou qu’il faut corriger en premier.' },
-    { cat: 'jourj', lvl: 3, type: 'qcm', q: 'Pour un concert d’école, un niveau confortable à la régie, c’est plutôt…', a: ['80-90 dB', '100-105 dB', '60 dB', '110 dB'], ok: 0, why: 'Assez pour que tout soit clair, sans fatiguer les oreilles des enfants.' }
+    { cat: 'jourj', lvl: 3, type: 'qcm', q: 'Pour un petit concert, un niveau confortable à la régie, c’est plutôt…', a: ['80-90 dB', '100-105 dB', '60 dB', '110 dB'], ok: 0, why: 'Assez pour que tout soit clair, sans fatiguer les oreilles des enfants.' }
   ];
 
   if (typeof module !== 'undefined' && module.exports) module.exports = { CATS, Q };
