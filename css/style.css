@@ -286,6 +286,7 @@ body.armed .stage { cursor: crosshair; }
 .hint-box h4 { margin: 0; }
 .hint-box ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .event-log li { font-size: 14px; display: grid; grid-template-columns: 38px 1fr; gap: 6px; }
+.event-log li.muted { display: block; }
 .ev-t { font-family: var(--f-num); color: var(--amber); font-size: 12px; padding-top: 2px; }
 .chip-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { background: var(--chassis-3); border: 1px solid var(--edge); border-radius: 14px; padding: 4px 10px; font-size: 13px; }

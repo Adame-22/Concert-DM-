@@ -104,6 +104,7 @@ js/coach.js       visite guidée, « Explique-moi », missions de l’atelier, c
 sw.js, manifest.webmanifest, icon.svg   appli installable et hors ligne
 js/game.js        déroulé du concert, notes, panneaux
 tests/            tests du moteur : `npm test` (Node 18+)
+outils/video/     la vidéo de présentation, filmée dans l’appli (voir son README)
 ```
 
 Les tests vérifient notamment que chaque plateau du concert a une solution sans larsen qui tient les objectifs de mix,
