@@ -59,6 +59,8 @@
             <select id="scene-select" class="scene-select"></select>
           </div>
           <div class="hud">
+            <button id="btn-tour" class="hud-btn" title="Visite guidée de l’écran"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke-width="2"/><path d="M10 8l6 4-6 4z"/></svg><span>Visite</span></button>
+            <button id="btn-explain" class="hud-btn explain-btn" aria-pressed="false" title="Explique-moi : touche un élément pour savoir à quoi il sert"><b>?</b><span>Explique-moi</span></button>
             <div class="view-toggle" role="group" aria-label="Vue de la scène">
               <button data-sv="salle" class="on" aria-pressed="true">Vue salle</button>
               <button data-sv="plan" aria-pressed="false">Plan</button>
@@ -114,6 +116,7 @@
 <script src="js/learn.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/quiz.js"></script>
+<script src="js/coach.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

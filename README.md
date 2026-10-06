@@ -17,7 +17,7 @@ Sur téléphone, commence par l’onglet **Apprendre**. Le concert complet (cons
 | **Apprendre** | Le point de départ, pensé pour le téléphone : 7 mini-leçons de 2 minutes, une notion à la fois (le bon micro, brancher et le 48 V, le gain, placer les retours, le larsen, ouvrir et couper au bon moment, le mélange). Gros boutons, Jérôme et Marc qui guident, des étoiles à gagner. Le larsen et les retours y sont calculés avec le vrai moteur physique. |
 | **Le concert** | Les 6 plateaux de la soirée : mot d’accueil, chorale + soliste + piano, duo folk, morceau des profs (flûte, violon, guitare, piano), atelier rock, grand final. Pour chacun : tu poses les micros et les retours, tu fais jouer les musiciens pour régler tes gains, puis tu lèves le rideau. Chaque morceau suit un **conducteur** (intro guitare seule, solo de la soliste, pont a cappella…) : à toi d’ouvrir et de couper les bonnes voies au bon moment. Pendant le spectacle il se passe des choses (la chanteuse descend dans le public, le micro pointe vers le retour, une enfant intimidée recule…). À la fin : une note sur 100 et la liste de ce qu’il faut retravailler. |
 | **Quiz** | Le jeu des questions : partie rapide (chrono par question, combos), par thème (micros, console, larsen, retours, scène, jour J), Oreille d’or (questions à l’écoute : quel instrument a disparu, la voix sature-t-elle, quelle fréquence siffle, qu’est-ce qui cloche dans ce mix), Chrono 60 s et Survie à 3 vies. XP, niveaux (de Stagiaire à Chef de régie), badges et révision des erreurs. |
-| **Atelier libre** | Matériel illimité, pas de chrono. Ajoute n’importe quel instrument et regarde l’effet de chaque réglage sur la marge avant larsen. |
+| **Atelier libre** | Matériel illimité, pas de chrono. Cinq **missions guidées** (premier micro, premier retour, provoquer puis maîtriser un larsen, le piège du 48 V, mélanger deux sources) : Jérôme ou Marc éclairent l’endroit où cliquer, et la mission avance toute seule quand c’est fait. Ensuite, ajoute n’importe quel instrument et regarde l’effet de chaque réglage sur la marge avant larsen. |
 | **Fiches** | La chaîne du son, dynamique / statique / DI, directivités, larsen, gain pas à pas, quel micro pour quoi, retours, check-list du jour J, glossaire. |
 
 ### Le son
@@ -76,6 +76,12 @@ Tout se règle dans `js/data.js` :
 - `VENUE` : position des enceintes de façade, distance de la régie, réverbération de la salle.
 - `MICS` / `SOURCES` : ajouter un micro ou un instrument.
 
+### Apprendre en jouant (Concert et Atelier)
+
+- **Visite** : au premier passage, Jérôme fait le tour de l’écran en 7 étapes (la scène, la valise, la console, ce que règlent les faders, le témoin de larsen…). Relançable avec le bouton « Visite ».
+- **Explique-moi** : active-le, puis touche n’importe quel bouton, réglage ou bonhomme : on t’explique à quoi il sert, sans rien modifier.
+- **Ta check-list** (onglet Scène du concert) : ce qu’il reste à faire pour le plateau en cours (micro de chaque musicien, 48 V, gains, retours demandés, conducteur). Toucher une ligne montre où agir.
+
 ## Organisation du code
 
 ```
@@ -94,6 +100,7 @@ js/learn.js       fiches, quiz, oreille
 js/parcours.js    les mini-leçons « Apprendre »
 js/questions.js   la banque de questions
 js/quiz.js        le jeu des questions, le profil (XP, niveaux, badges)
+js/coach.js       visite guidée, « Explique-moi », missions de l’atelier, check-list du concert
 sw.js, manifest.webmanifest, icon.svg   appli installable et hors ligne
 js/game.js        déroulé du concert, notes, panneaux
 tests/            tests du moteur : `npm test` (Node 18+)

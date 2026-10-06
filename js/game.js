@@ -73,6 +73,10 @@
       if (root.SonoLearn) root.SonoLearn.init(this);
       if (root.SonoParcours) root.SonoParcours.init(this);
       if (root.SonoQuiz) root.SonoQuiz.init(this);
+      if (root.SonoCoach) root.SonoCoach.init(this);
+      document.addEventListener('pointerdown', (e) => {
+        if (root.SonoCoach && root.SonoCoach.explain && e.target.closest('#view-sim') && !e.target.closest('#btn-explain') && !e.target.closest('.spot-bubble')) e.stopPropagation();
+      }, true);
       $('level-chip').addEventListener('click', () => this.switchView('quiz'));
       $('go-parcours').addEventListener('click', () => this.switchView('parcours'));
       setInterval(() => this.tick(), TICK);
@@ -125,6 +129,7 @@
         this.renderSceneSelect();
         this.renderAll();
         if (v === 'concert' && !this.briefShown) { this.briefShown = true; this.openBrief(); }
+        else if (root.SonoCoach) root.SonoCoach.offerTourIfNew();
       } else {
         this.fx.ampDb = -80;
         document.body.classList.remove('larsen');
@@ -387,7 +392,7 @@
         h('div', { class: 'brief-steps' },
           h('span', null, 'Pose les micros et les retours'), h('span', null, 'Fais jouer chaque musicien et règle tes gains'), h('span', null, 'Lève le rideau')),
         h('div', { class: 'modal-actions' },
-          h('button', { class: 'primary', onclick: () => { this.closeModal(); this.setSideTab(this.state.mics.length ? 'scene' : 'valise'); } }, 'Préparer le plateau')));
+          h('button', { class: 'primary', onclick: () => { this.closeModal(); this.setSideTab(this.state.mics.length ? 'scene' : 'valise'); if (root.SonoCoach) root.SonoCoach.offerTourIfNew(); } }, 'Préparer le plateau')));
       this.openModal(content);
     },
 
@@ -790,6 +795,10 @@
       if (this.stageDirty && this.ui.stageView === 'plan') { Stage.render(); this.stageDirty = false; }
       if (this.sideDirty) { this.renderSide(); this.sideDirty = false; }
       if (this.frame % 2 === 0) this.updateSideLive();
+      if (root.SonoCoach) {
+        root.SonoCoach.update();
+        if (this.frame % 10 === 0 && this.ui.sideTab === 'scene' && root.SonoCoach.checklistChanged()) this.sideDirty = true;
+      }
       this.updateHud();
     },
 
@@ -934,6 +943,7 @@
         return wrap;
       }
       wrap.appendChild(h('h3', null, sc.title));
+      if (root.SonoCoach) wrap.appendChild(root.SonoCoach.checklistEl());
       wrap.appendChild(h('p', { class: 'muted' }, sc.brief));
       wrap.appendChild(h('div', { class: 'row-between' },
         h('h4', null, 'Balance : fais jouer les musiciens'),
@@ -969,6 +979,7 @@
     panelAtelier() {
       const st = this.state;
       const wrap = h('div', { class: 'panel' });
+      if (root.SonoCoach) wrap.appendChild(root.SonoCoach.missionsEl());
       wrap.appendChild(h('h3', null, 'Ton plateau'));
       wrap.appendChild(h('p', { class: 'muted' }, 'Ajoute des musiciens, déplace-les, change de micro, et regarde comment bouge la marge avant larsen dans l’onglet Analyse.'));
       if (st.sources.length) wrap.appendChild(h('ul', { class: 'mus-list' }, st.sources.map(s => this.musicianRow(s))));
@@ -997,7 +1008,7 @@
         const left = S.stock(st, type);
         const armed = this.ui.armed && this.ui.armed.kind === 'mic' && this.ui.armed.type === type;
         list.appendChild(h('li', null, h('button', {
-          class: 'case-item' + (armed ? ' on' : '') + (left <= 0 ? ' out' : ''), disabled: left <= 0 || !this.canEdit() ? true : null,
+          class: 'case-item' + (armed ? ' on' : '') + (left <= 0 ? ' out' : ''), 'data-type': type, disabled: left <= 0 || !this.canEdit() ? true : null,
           onclick: () => this.arm('mic', type)
         },
         h('span', { class: 'case-short k-' + def.kind }, def.short),
@@ -1007,7 +1018,7 @@
       const wl = S.stock(st, 'wedge');
       const armedW = this.ui.armed && this.ui.armed.kind === 'wedge';
       list.appendChild(h('li', null, h('button', {
-        class: 'case-item wedge-item' + (armedW ? ' on' : '') + (wl <= 0 ? ' out' : ''), disabled: wl <= 0 || !this.canEdit() ? true : null,
+        class: 'case-item wedge-item' + (armedW ? ' on' : '') + (wl <= 0 ? ' out' : ''), 'data-type': 'wedge', disabled: wl <= 0 || !this.canEdit() ? true : null,
         onclick: () => this.arm('wedge')
       }, h('span', { class: 'case-short k-wedge' }, 'RET'), h('span', { class: 'case-main' }, h('b', null, 'Retour de scène'), h('span', { class: 'case-model' }, 'enceinte au sol, face au musicien')), h('span', { class: 'case-count' }, wl === Infinity ? '∞' : '×' + wl))));
       wrap.appendChild(list);

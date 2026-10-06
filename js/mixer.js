@@ -24,7 +24,7 @@
       const bar = h('div', { class: 'layer-bar', role: 'tablist', 'aria-label': 'Mix affiché sur les faders' },
         h('span', { class: 'layer-title' }, 'Les faders contrôlent :'));
       for (const L of LAYERS) {
-        const b = h('button', { class: 'layer-btn ' + L.cls, role: 'tab', onclick: () => this.setLayer(L.id) }, L.label);
+        const b = h('button', { class: 'layer-btn ' + L.cls, role: 'tab', 'data-layer': String(L.id), onclick: () => this.setLayer(L.id) }, L.label);
         b._layer = L.id;
         this.layerBtns.push(b);
         bar.appendChild(b);

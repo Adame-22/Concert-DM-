@@ -982,3 +982,48 @@ body { background: radial-gradient(1200px 600px at 70% -10%, #1f1a2a 0%, rgba(19
 
 @media (max-width: 1500px) { .brand-sub { display: none; } }
 @media (max-width: 1250px) and (min-width: 721px) { #vol { width: 70px; } .level-chip .lv-txt { display: none; } .level-chip { padding-right: 3px; } .tabs button { padding: 7px 9px; } }
+
+/* ------------------------------------------------------------ Coach : projecteur, explications, missions, liste */
+.hud-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--chassis-3); border: 1px solid var(--edge); border-radius: 18px; padding: 5px 12px 5px 6px; font-family: var(--f-label); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--silk); }
+.hud-btn svg { width: 22px; height: 22px; fill: var(--amber); stroke: var(--amber); }
+.explain-btn b { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--aux1); color: var(--chassis); font-family: var(--f-label); font-size: 15px; }
+.explain-btn.on { background: var(--aux1); color: var(--chassis); border-color: var(--aux1); }
+.explain-btn.on b { background: var(--chassis); color: var(--aux1); }
+body.explain #view-sim { cursor: help; }
+body.explain #view-sim button, body.explain #view-sim .knob, body.explain #view-sim .fader, body.explain #salle { cursor: help; }
+body.explain .stage-wrap, body.explain .console, body.explain .side { box-shadow: 0 0 0 2px rgba(88,174,224,0.5); }
+.spot { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.spot-hole { position: fixed; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(5,6,8,0.55); border: 2px solid var(--amber); animation: spot-pulse 1.2s ease-in-out infinite alternate; transition: left .2s, top .2s, width .2s, height .2s; }
+.spot-hole.nodim { box-shadow: 0 0 0 4px rgba(242,165,58,0.25), 0 0 24px rgba(242,165,58,0.5); }
+@keyframes spot-pulse { to { border-color: #ffd28a; } }
+.spot-bubble { position: fixed; pointer-events: auto; background: var(--chassis-2); border: 1px solid var(--amber); border-radius: 16px; padding: 14px 16px; box-shadow: 0 16px 40px rgba(0,0,0,0.55); display: flex; flex-direction: column; gap: 10px; animation: qz-in .2s ease-out; }
+.spot-head { display: flex; gap: 10px; align-items: center; }
+.spot-head > div { display: flex; flex-direction: column; }
+.spot-step { font-size: 12px; color: var(--silk-dim); font-family: var(--f-num); }
+.spot-bubble p { margin: 0; font-size: 16px; line-height: 1.45; }
+.spot-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; align-items: center; }
+.spot-actions .primary { padding: 8px 16px; font-size: 15px; }
+@media (prefers-reduced-motion: reduce) { .spot-hole { animation: none; transition: none; } .spot-bubble { animation: none; } }
+.missions { display: flex; flex-direction: column; gap: 6px; }
+.mission { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; background: var(--chassis-3); border: 1px solid var(--edge); border-radius: 12px; padding: 8px 10px; }
+.mission:hover { border-color: var(--silk-dim); }
+.mission.cur { border-color: var(--amber); box-shadow: 0 0 0 2px var(--amber-glow); }
+.mission-n { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--chassis-4); font-family: var(--f-num); font-weight: 600; }
+.mission.done .mission-n { background: var(--led-g); color: var(--chassis); }
+.mission-main { display: flex; flex-direction: column; min-width: 0; }
+.mission-main b { font-size: 15px; }
+.mission-main span { font-size: 12.5px; color: var(--silk-dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.checklist-coach { background: var(--chassis-3); border: 1px solid var(--edge); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.checklist-coach h4 { margin: 0; }
+.cl-count { font-family: var(--f-num); font-size: 13px; color: var(--amber); }
+.cl-count.all { color: var(--led-g); }
+.cl-bar { height: 6px; border-radius: 3px; background: var(--chassis-4); overflow: hidden; }
+.cl-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--amber), var(--led-g)); transition: width .4s; }
+.cl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.cl-item { width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; text-align: left; background: none; border: 0; border-radius: 6px; padding: 5px 4px; font-size: 13.5px; }
+.cl-item:hover { background: var(--chassis-4); }
+.cl-tick { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--silk-faint); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.cl-item.ok { color: var(--silk-dim); }
+.cl-item.ok .cl-tick { background: var(--led-g); border-color: var(--led-g); color: var(--chassis); }
+.cl-show { font-family: var(--f-label); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--amber); }
+@media (max-width: 720px) { .hud-btn span { display: none; } .hud-btn { padding: 5px; } }
