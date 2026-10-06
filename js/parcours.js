@@ -9,6 +9,7 @@
   const U = root.SonoUI;
   const A = root.SonoAudio;
   const Salle = root.SonoSalle;
+  const Mu = () => (root.SonoMusic && A.ctx && A.enabled ? root.SonoMusic : null);
   const h = U.h;
   const $ = (id) => document.getElementById(id);
 
@@ -206,11 +207,11 @@
       id: 'gain', title: 'Le gain', sub: 'Ni trop faible, ni saturé', who: 'marc',
       hello: 'Le gain, c’est le premier bouton en haut de chaque voie. Il règle la force du signal qui entre dans la console. Trop bas, ça souffle. Trop haut, ça sature.',
       steps: [
-        { type: 'gain', who: 'marc', text: 'Inès chante. Tourne le gain pour que les LED montent dans le vert et le jaune, sans jamais toucher le rouge. Tiens 3 secondes.', src: { base: -64, crest: 12, wobble: 3 }, start: 20,
+        { type: 'gain', who: 'marc', text: 'Inès chante. Tourne le gain pour que les LED montent dans le vert et le jaune, sans jamais toucher le rouge. Tiens 3 secondes.', src: { base: -64, crest: 12, wobble: 3 }, start: 20, mtype: 'voix',
           scene: { cast: [{ x: 0.5, look: LK.ines, pose: { arms: 'mic' }, sing: true, label: 'Inès' }] } },
-        { type: 'gain', who: 'marc', text: 'Sam tape sur la grosse caisse. Les coups font des crêtes très fortes : règle sur les coups, pas sur la moyenne.', src: { base: -54, crest: 18, wobble: 2, hits: true }, start: 56,
+        { type: 'gain', who: 'marc', text: 'Sam tape sur la grosse caisse. Les coups font des crêtes très fortes : règle sur les coups, pas sur la moyenne.', src: { base: -54, crest: 18, wobble: 2, hits: true }, start: 56, mtype: 'gc',
           scene: { cast: [{ x: 0.5, look: LK.sam, prop: 'kick', pose: { arms: 'drums' }, label: 'Sam' }] } },
-        { type: 'gain', who: 'marc', text: 'Jade est timide et chante tout doucement. Il va falloir plus de gain.', src: { base: -72, crest: 12, wobble: 3 }, start: 25,
+        { type: 'gain', who: 'marc', text: 'Jade est timide et chante tout doucement. Il va falloir plus de gain.', src: { base: -72, crest: 12, wobble: 3 }, start: 25, mtype: 'soliste',
           scene: { cast: [{ x: 0.5, look: LK.jade, pose: { arms: 'mic' }, sing: true, label: 'Jade' }] } },
         { type: 'choice', who: 'marc', text: 'Pendant le concert, la LED rouge de la voie d’Inès s’allume. Tu fais quoi ?',
           options: [
@@ -254,9 +255,9 @@
       steps: [
         { type: 'mute', who: 'lucie', dur: 32, text: 'Suis le morceau : touche une voie pour l’ouvrir (verte) ou la couper (rouge).',
           players: [
-            { id: 'voix', name: 'Inès', look: LK.ines, sing: true, pose: { arms: 'mic' } },
-            { id: 'guit', name: 'Guitare', look: LK.guitare, pose: { arms: 'guitar', instr: 'acoustic' } },
-            { id: 'jade', name: 'Jade', look: LK.jade, sing: true, pose: { arms: 'mic' } }
+            { id: 'voix', name: 'Inès', look: LK.ines, sing: true, pose: { arms: 'mic' }, mtype: 'voix' },
+            { id: 'guit', name: 'Guitare', look: LK.guitare, pose: { arms: 'guitar', instr: 'acoustic' }, mtype: 'guitare_folk' },
+            { id: 'jade', name: 'Jade', look: LK.jade, sing: true, pose: { arms: 'mic' }, mtype: 'soliste' }
           ],
           cues: [
             { t: 0, label: 'Intro guitare', plays: ['guit'] },
@@ -272,10 +273,10 @@
       hello: 'Le mix, c’est l’équilibre : que le public entende les paroles, sans que les instruments disparaissent. Et pas trop fort, il y a des enfants dans la salle.',
       steps: [
         { type: 'mix', who: 'marc', text: 'Inès chante avec la guitare. Règle les deux faders pour que le public soit content, et tiens 3 secondes.',
-          chans: [{ id: 'voix', name: 'Chant', look: LK.ines, sing: true, pose: { arms: 'mic' }, ac: 58, start: -30 }, { id: 'guit', name: 'Guitare', look: LK.guitare, pose: { arms: 'guitar', instr: 'acoustic' }, ac: 56, start: -2 }],
+          chans: [{ id: 'voix', name: 'Chant', look: LK.ines, sing: true, pose: { arms: 'mic' }, ac: 58, start: -30, mtype: 'voix' }, { id: 'guit', name: 'Guitare', look: LK.guitare, pose: { arms: 'guitar', instr: 'acoustic' }, ac: 56, start: -2, mtype: 'guitare_folk' }],
           rule: { lead: 'voix', min: 3, max: 9, leq: [76, 90] } },
         { type: 'mix', who: 'marc', text: 'Le groupe rock : la batterie s’entend déjà fort sans micro. Fais passer la voix de Léa par-dessus.',
-          chans: [{ id: 'voix', name: 'Chant', look: { shirt: '#c2185b', hair: '#7b2d8b', skin: '#f1c9a5', style: 'long' }, sing: true, pose: { arms: 'mic' }, ac: 60, start: -12 }, { id: 'drums', name: 'Batterie', look: LK.sam, prop: 'kick', pose: { arms: 'drums' }, ac: 86, start: 0 }],
+          chans: [{ id: 'voix', name: 'Chant', look: { shirt: '#c2185b', hair: '#7b2d8b', skin: '#f1c9a5', style: 'long' }, sing: true, pose: { arms: 'mic' }, ac: 60, start: -12, mtype: 'voix' }, { id: 'drums', name: 'Batterie', look: LK.sam, prop: 'kick', pose: { arms: 'drums' }, ac: 86, start: 0, mtypes: ['gc', 'cc', 'oh'] }],
           rule: { lead: 'voix', min: 2, max: 8, leq: [86, 97] }, pa: 90 }
       ]
     }
@@ -300,6 +301,7 @@
       this.raf = 0;
       if (this.cleanup) { this.cleanup(); this.cleanup = null; }
       if (A.ctx) A.setFeedback(1000, 0);
+      if (root.SonoMusic) root.SonoMusic.silence();
     },
     leave() { this.stopAnim(); },
 
@@ -402,7 +404,12 @@
     finish() {
       const L = this.lesson;
       const stars = this.mistakes === 0 ? 3 : this.mistakes <= 2 ? 2 : 1;
+      const had = this.progress()[L.id] || 0;
       this.save(L.id, stars);
+      if (root.SonoProfil) {
+        if (stars > had) root.SonoProfil.add((stars - had) * 40 + (had ? 0 : 20), 'leçon « ' + L.title + ' »');
+        if (LESSONS.every(l => this.progress()[l.id])) root.SonoProfil.award('parcours');
+      }
       const idx = LESSONS.indexOf(L);
       const nextL = LESSONS[idx + 1];
       const el = $('view-parcours');
@@ -530,7 +537,9 @@
         const wob = Math.sin(t * 2.1) * st.src.wobble + Math.sin(t * 5.3) * 1.2;
         const hit = st.src.hits ? (Math.sin(t * 6.5) > 0.6 ? 0 : -10) : 0;
         const peak = st.src.base + +slider.value + wob + hit + st.src.crest - 12;
-        segs && meter.querySelectorAll('i').forEach((s, i) => s.classList.toggle('on', peak >= DB(i)));
+        meter.querySelectorAll('i').forEach((s, i) => s.classList.toggle('on', peak >= DB(i)));
+        const mu = Mu();
+        if (mu && (!this._mt || now - this._mt > 90)) { this._mt = now; mu.direct([{ id: 'g', type: st.src.mtype || 'voix', db: Math.max(-40, Math.min(2, peak + 2)), peak }], st.src.mtype === 'gc' ? 'rock' : 'duo'); }
         if (!done) {
           if (peak > 0) {
             clipT = now; held = Math.max(0, held - 1.5);
@@ -661,6 +670,8 @@
         const m = base - +slider.value;
         amp = m <= 0 ? Math.min(0, amp + (2 - m) * 0.8) : Math.max(-80, amp - 3);
         if (A.ctx) A.setFeedback(2500 * 1.01, amp > -60 ? Math.pow(10, amp / 30) * 0.7 : 0);
+        const mu = Mu();
+        if (mu && (!this._mt || now0() - this._mt > 200)) { this._mt = now0(); mu.direct([{ id: 'v', type: 'voix', db: -6 }], 'duo'); }
         const now = performance.now();
         if (m > 0 && m < 3 && now > ringT && A.ctx && A.enabled) { A.ring(2525, 0.15 + (3 - m) * 0.08, 0.6); ringT = now + 1800; }
         requestAnimationFrame(tick);
@@ -768,6 +779,8 @@
           if (toClose.length) parts.push('coupe ' + toClose.join(' et '));
           U.toast(this.toastBox(), 'Dans 2 s : ' + nxt.label + (parts.length ? ' · ' + parts.join(', ') : ''), 'cue', 2600, D.PEOPLE.lucie);
         }
+        const mu = Mu();
+        if (mu) mu.direct(st.players.map(p => ({ id: p.id, type: p.mtype, playing: c.plays.includes(p.id), db: open[p.id] ? -4 : -26 })), 'duo');
         for (const p of st.players) {
           total++;
           if (c.plays.includes(p.id) === open[p.id]) correct++;
@@ -859,6 +872,13 @@
         const now = performance.now();
         const dt = Math.min(0.1, (now - last) / 1000); last = now;
         verdict = judge();
+        const mu = Mu();
+        if (mu) {
+          const Lv = levels();
+          const list = [];
+          for (const c of st.chans) for (const ty of (c.mtypes || [c.mtype])) list.push({ id: c.id + ty, type: ty, db: Math.max(-40, (Lv[c.id] - 88) * 0.9 - 4) });
+          mu.direct(list, st.chans.some(c => c.prop === 'kick') ? 'rock' : 'duo');
+        }
         msg.textContent = verdict.text; msg.className = 'pc-live ' + (verdict.ok ? 'g' : 'y');
         held = verdict.ok ? held + dt : Math.max(0, held - dt * 2);
         ring.style.setProperty('--p', Math.min(1, held / 3));
@@ -876,9 +896,11 @@
     }
   };
 
+  function now0() { return performance.now(); }
   function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
   P.LESSONS = LESSONS;
+  P.icon = icon;
   P.marginFor = marginFor;
   root.SonoParcours = P;
 })(this);

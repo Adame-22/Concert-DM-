@@ -1,4 +1,4 @@
-/* Sono Sim — console de mixage : 16 voies, façade + 4 retours (« sends on fader »), EQ graphique. */
+/* Sono Sim — console de mixage : 48 voies en 3 banques de 16, façade + 4 retours (« sends on fader »), EQ graphique. */
 (function (root) {
   'use strict';
   const D = root.SonoData;
@@ -13,6 +13,7 @@
     { id: 3, label: 'RETOUR 4', cls: 'l-a4' }
   ];
 
+  const G0 = (m) => m.game;
   const Mixer = {
     root: null, game: null, strips: [], master: null, layerBtns: [],
 
@@ -29,18 +30,42 @@
         bar.appendChild(b);
       }
       bar.appendChild(h('span', { class: 'layer-help', id: 'layer-help' }));
+      // banques : comme sur une console numérique, 16 faders physiques pour 48 voies
+      const banks = h('div', { class: 'bank-bar', role: 'tablist', 'aria-label': 'Banque de voies' }, h('span', { class: 'layer-title' }, 'Voies'));
+      this.bankBtns = [0, 1, 2].map(k => {
+        const b = h('button', { class: 'bank-btn', role: 'tab', onclick: () => this.setBank(k) }, (k * 16 + 1) + '–' + (k * 16 + 16));
+        banks.appendChild(b);
+        return b;
+      });
+      this.bank = 0;
       const deck = h('div', { class: 'deck' });
       const stripsWrap = h('div', { class: 'strips' });
-      for (let i = 0; i < 16; i++) {
+      const n = G0(this).state.channels.length;
+      for (let i = 0; i < n; i++) {
         const s = this.buildStrip(i);
         this.strips.push(s);
         stripsWrap.appendChild(s.el);
       }
       this.master = this.buildMaster();
       deck.append(stripsWrap, this.master.el);
-      el.append(bar, deck);
+      el.append(bar, banks, deck);
       this.setLayer('main');
+      this.setBank(0);
     },
+
+    setBank(k) {
+      this.bank = k;
+      this.bankBtns.forEach((b, i) => { b.classList.toggle('on', i === k); b.setAttribute('aria-selected', String(i === k)); });
+      this.strips.forEach((s, i) => { s.el.hidden = Math.floor(i / 16) !== k; });
+      this.paintBanks();
+    },
+    // un point sur la banque qui contient des voies utilisées
+    paintBanks() {
+      const st = this.game.state;
+      if (!st || !this.bankBtns) return;
+      this.bankBtns.forEach((b, k) => b.classList.toggle('used', st.mics.some(m => Math.floor(m.ch / 16) === k)));
+    },
+    showChannel(i) { if (Math.floor(i / 16) !== this.bank) this.setBank(Math.floor(i / 16)); },
 
     setLayer(id) {
       this.game.ui.layer = id;
@@ -137,7 +162,8 @@
     refresh() {
       const G = this.game;
       if (!G.state) return;
-      for (let i = 0; i < 16; i++) this.refreshStrip(i);
+      for (let i = 0; i < this.strips.length; i++) this.refreshStrip(i);
+      this.paintBanks();
       const L = G.ui.layer;
       const bus = L === 'main' ? G.state.main : G.state.aux[L];
       this.master.title.textContent = L === 'main' ? 'FAÇADE' : 'RETOUR ' + (L + 1);

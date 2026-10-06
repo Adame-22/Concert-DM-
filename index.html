@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#13161a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Sono Sim · Destination Musique</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,14 +20,14 @@
     <span class="brand-sub">Concert Destination Musique</span>
   </div>
   <nav class="tabs" role="tablist" aria-label="Sections">
-    <button data-view="parcours" role="tab" aria-selected="false">Apprendre</button>
-    <button data-view="concert" class="on" role="tab" aria-selected="true">Le concert</button>
-    <button data-view="atelier" role="tab" aria-selected="false">Atelier libre</button>
-    <button data-view="oreille" role="tab" aria-selected="false">Oreille</button>
-    <button data-view="quiz" role="tab" aria-selected="false">Quiz</button>
-    <button data-view="fiches" role="tab" aria-selected="false">Fiches</button>
+    <button data-view="parcours" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5" fill="none" stroke-width="2"/></svg><span>Apprendre</span></button>
+    <button data-view="quiz" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Quiz</span></button>
+    <button data-view="concert" class="on" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="4" height="16" rx="1.5"/><rect x="10" y="4" width="4" height="16" rx="1.5"/><rect x="17" y="4" width="4" height="16" rx="1.5"/><rect x="2" y="13" width="6" height="3" rx="1" fill="#13161a"/><rect x="9" y="8" width="6" height="3" rx="1" fill="#13161a"/><rect x="16" y="11" width="6" height="3" rx="1" fill="#13161a"/></svg><span>Concert</span></button>
+    <button data-view="atelier" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.5"/><rect x="10.5" y="12" width="3" height="9" rx="1.5"/></svg><span>Atelier</span></button>
+    <button data-view="fiches" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5z"/><path d="M8 11h8M8 15h8M8 7h5" fill="none" stroke="#13161a" stroke-width="1.8"/></svg><span>Fiches</span></button>
   </nav>
   <div class="top-tools">
+    <button id="level-chip" class="level-chip" title="Ton niveau"></button>
     <label class="switch" title="Mode apprentissage : analyseur, conseils et zones cibles visibles">
       <input type="checkbox" id="opt-help" checked>
       <span class="switch-track" aria-hidden="true"></span>
@@ -90,8 +94,7 @@
     <div id="console" class="console" aria-label="Console de mixage"></div>
   </section>
 
-  <section id="view-oreille" class="view-learn" hidden></section>
-  <section id="view-quiz" class="view-learn" hidden></section>
+  <section id="view-quiz" class="view-quiz" hidden></section>
   <section id="view-fiches" class="view-learn" hidden></section>
 </main>
 
@@ -102,12 +105,15 @@
 <script src="js/engine.js"></script>
 <script src="js/state.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/music.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/stage.js"></script>
 <script src="js/salle.js"></script>
 <script src="js/parcours.js"></script>
 <script src="js/mixer.js"></script>
 <script src="js/learn.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/quiz.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

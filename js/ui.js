@@ -199,10 +199,32 @@
     return t;
   }
 
+  // pluie de confettis (respecte la réduction des animations)
+  function confetti(count) {
+    try { if (root.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) { /* ignore */ }
+    const cv = document.createElement('canvas');
+    cv.className = 'confetti';
+    document.body.appendChild(cv);
+    const W = cv.width = root.innerWidth, H = cv.height = root.innerHeight;
+    const ctx = cv.getContext('2d');
+    const cols = ['#f2a53a', '#5bcb6d', '#58aee0', '#bb86e6', '#ea829f', '#ebe4cd'];
+    const ps = Array.from({ length: count || 120 }, () => ({
+      x: W / 2 + (Math.random() - 0.5) * W * 0.3, y: H * 0.35, vx: (Math.random() - 0.5) * 14, vy: -Math.random() * 14 - 4,
+      r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.4, w: 6 + Math.random() * 6, h: 4 + Math.random() * 4, c: cols[Math.floor(Math.random() * cols.length)]
+    }));
+    const t0 = performance.now();
+    const step = (t) => {
+      ctx.clearRect(0, 0, W, H);
+      for (const p of ps) { p.vy += 0.45; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore(); }
+      if (t - t0 < 2600) requestAnimationFrame(step); else cv.remove();
+    };
+    requestAnimationFrame(step);
+  }
+
   const store = {
     get(k, d) { try { const v = localStorage.getItem('sonosim.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem('sonosim.' + k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
   };
 
-  root.SonoUI = { h, knob, fader, meter, toast, avatar, fmtDb, fmtHz, store, SEGS };
+  root.SonoUI = { h, knob, fader, meter, toast, avatar, confetti, fmtDb, fmtHz, store, SEGS };
 })(this);

@@ -5,7 +5,7 @@
   const D = isNode ? require('./data.js') : root.SonoData;
   const E = isNode ? require('./engine.js') : root.SonoEngine;
 
-  const NCH = 16;
+  const NCH = 48; // la console de l’école : 48 voies
   const NAUX = 4;
   let uidSeq = 1;
   const uid = (p) => p + (uidSeq++);

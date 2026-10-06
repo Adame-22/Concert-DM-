@@ -150,3 +150,16 @@ test('chaque personne citée dans le concert existe, et chaque plateau a son int
     for (const e of sc.events) if (e.from) assert.ok(D.PEOPLE[e.from], sc.id + ' : ' + e.from);
   }
 });
+
+test('banque de questions : chaque question est jouable', () => {
+  const { CATS, Q } = require('../js/questions.js');
+  assert.ok(Q.length >= 50, 'au moins 50 questions');
+  for (const q of Q) {
+    assert.ok(CATS[q.cat], q.q);
+    assert.ok([1, 2, 3].includes(q.lvl), q.q);
+    assert.ok(q.why && q.why.length > 10, q.q);
+    if (q.type === 'tf') assert.strictEqual(typeof q.ok, 'boolean', q.q);
+    else if (q.type === 'order') assert.ok(q.items.length >= 3, q.q);
+    else assert.ok(q.ok >= 0 && q.ok < q.a.length, q.q);
+  }
+});

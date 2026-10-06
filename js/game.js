@@ -72,12 +72,15 @@
       this.renderAll();
       if (root.SonoLearn) root.SonoLearn.init(this);
       if (root.SonoParcours) root.SonoParcours.init(this);
+      if (root.SonoQuiz) root.SonoQuiz.init(this);
+      $('level-chip').addEventListener('click', () => this.switchView('quiz'));
       $('go-parcours').addEventListener('click', () => this.switchView('parcours'));
       setInterval(() => this.tick(), TICK);
+      try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => { /* pas de mode hors ligne ici */ }); } catch (e) { /* hors ligne indisponible ici */ }
       const hash = (location.hash || '').replace('#', '');
       const firstTime = !Object.keys(U.store.get('parcours', {})).length;
       const narrow = root.innerWidth < 720;
-      if (['concert', 'atelier', 'parcours', 'oreille', 'quiz', 'fiches'].includes(hash)) this.switchView(hash);
+      if (['concert', 'atelier', 'parcours', 'quiz', 'fiches'].includes(hash)) this.switchView(hash);
       else if (firstTime || narrow) this.switchView('parcours');
       else this.switchView('concert');
     },
@@ -105,8 +108,11 @@
       });
       const sim = v === 'concert' || v === 'atelier';
       $('view-sim').hidden = !sim;
-      ['parcours', 'oreille', 'quiz', 'fiches'].forEach(k => { $('view-' + k).hidden = v !== k; });
+      ['parcours', 'quiz', 'fiches'].forEach(k => { $('view-' + k).hidden = v !== k; });
       if (v !== 'parcours' && root.SonoParcours) root.SonoParcours.leave();
+      if (v !== 'quiz' && root.SonoQuiz) root.SonoQuiz.leave();
+      if (v === 'quiz' && root.SonoQuiz) root.SonoQuiz.show();
+      if (root.SonoMusic) root.SonoMusic.silence();
       if (v === 'parcours' && root.SonoParcours) root.SonoParcours.show();
       try { root.scrollTo(0, 0); } catch (e) { /* ignore */ }
       if (sim) {
@@ -123,7 +129,7 @@
         this.fx.ampDb = -80;
         document.body.classList.remove('larsen');
         A.setFeedback(1000, 0);
-        if (root.SonoLearn && v !== 'parcours') root.SonoLearn.show(v);
+        if (root.SonoLearn && v === 'fiches') root.SonoLearn.show(v);
       }
       if (this.ui.armed) this.disarm();
       if (v !== 'oreille' && root.SonoLearn) root.SonoLearn.stopEar();
@@ -146,6 +152,7 @@
       }
       const on = !A.enabled;
       A.setEnabled(on);
+      if (!on && root.SonoMusic) root.SonoMusic.silence();
       btn.classList.toggle('on', on);
       btn.textContent = on ? 'Son activé' : 'Son coupé';
       btn.setAttribute('aria-pressed', String(on));
@@ -283,6 +290,7 @@
 
     selectChannel(i) {
       this.ui.selCh = i;
+      Mixer.showChannel(i);
       const m = this.state.mics.find(x => x.ch === i);
       if (m) this.ui.sel = { kind: 'mic', id: m.uid };
       Mixer.refresh();
@@ -661,6 +669,11 @@
       const total = Math.round(scores.reduce((a, s) => a + s.v * s.w, 0) / wsum);
       const prev = this.best[sc.id];
       if (prev == null || total > prev) { this.best[sc.id] = total; U.store.set('best', this.best); }
+      if (root.SonoProfil) {
+        root.SonoProfil.add(Math.round(total / 2), 'plateau « ' + sc.title + ' »');
+        if (total >= 80) root.SonoProfil.award('concert');
+        if (acc.larsenT === 0 && acc.ringT < 1) root.SonoProfil.award('zerolarsen');
+      }
 
       this.resetSources();
       this.show = null;
@@ -763,6 +776,7 @@
       }
       fx.leq = fx.larsenOn ? E.dbAdd(aud.leq, 100 + fx.ampDb * 0.8) : aud.leq;
       this.computeReactions(levels, aud, sc, now);
+      if (root.SonoMusic && A.ctx && A.enabled) root.SonoMusic.syncSim(st, levels, aud, sc ? sc.id : 'atelier', E);
 
       if (this.show) {
         this.accumulate(dt, levels, aud, needs);
@@ -1034,7 +1048,9 @@
       wrap.appendChild(h('h3', null, 'Le patch'));
       wrap.appendChild(h('p', { class: 'muted' }, 'Chaque micro est branché sur une prise du boîtier de scène. La prise 1 arrive sur la voie 1 de la console, la prise 2 sur la voie 2… Rebrancher un micro ailleurs, c’est le faire arriver sur une autre voie, avec les réglages de cette voie.'));
       const tbl = h('ol', { class: 'patch-list' });
-      for (let i = 0; i < st.channels.length; i++) {
+      const maxUsed = st.mics.reduce((m, x) => Math.max(m, x.ch), 0);
+      const shown = this.ui.patchAll ? st.channels.length : Math.max(16, Math.ceil((maxUsed + 1) / 16) * 16);
+      for (let i = 0; i < shown; i++) {
         const mic = st.mics.find(m => m.ch === i);
         const src = mic ? E.findSource(st, mic.sourceId) : null;
         const def = mic ? D.MICS[mic.type] : null;
@@ -1053,6 +1069,7 @@
           mic ? sel : h('span')));
       }
       wrap.appendChild(tbl);
+      if (shown < st.channels.length) wrap.appendChild(h('button', { class: 'btn-text strong', onclick: () => { this.ui.patchAll = true; this.sideDirty = true; } }, 'Voir les ' + st.channels.length + ' prises'));
       if (this.ui.help) wrap.appendChild(h('div', { class: 'hint-box' }, h('h4', null, 'Astuce de pro'), h('p', null, 'Garde toujours le même ordre : batterie, basse, guitares, claviers, chants. Le jour J, tu retrouves chaque voie sans chercher.')));
       return wrap;
     },
