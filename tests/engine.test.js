@@ -163,3 +163,30 @@ test('banque de questions : chaque question est jouable', () => {
     else assert.ok(q.ok >= 0 && q.ok < q.a.length, q.q);
   }
 });
+
+test('câblage : chaque installation est faisable et la solution passe le test son', () => {
+  const C = require('../js/cablage.js');
+  for (const lv of C.LEVELS) {
+    const usedPorts = new Set();
+    for (const [a, b] of lv.links) {
+      for (const k of [a, b]) {
+        assert.ok(!usedPorts.has(k), `${lv.id} : la prise ${k} sert deux fois`);
+        usedPorts.add(k);
+      }
+      const ok = lv.cables.some(c => C.canLink(lv, c, a, b) === null);
+      assert.ok(ok, `${lv.id} : aucun câble ne relie ${a} et ${b}`);
+    }
+    for (const [v] of lv.phantom) assert.ok(lv.devices.some(d => d.phantom >= v), `${lv.id} : pas de 48 V pour la voie ${v}`);
+    const ph = new Set(lv.phantom.map(p => p[0]));
+    assert.deepStrictEqual(C.check(lv, lv.links, ph, 0), [], `${lv.id} : la solution devrait passer`);
+    // une erreur de patch et un 48 V oublié sont détectés
+    const wrong = lv.links.slice(1);
+    assert.ok(C.check(lv, wrong, ph, 0).length >= 1, `${lv.id} : un câble manquant doit être signalé`);
+    if (lv.phantom.length) assert.ok(C.check(lv, lv.links, new Set(), 0).some(i => i.ph), `${lv.id} : le 48 V oublié doit être signalé`);
+  }
+  // les branchements impossibles sont refusés
+  const lv = C.LEVELS.find(l => l.id === 'ampli');
+  assert.ok(C.canLink(lv, 'xlr', 'con.L', 'pl.in'), 'XLR dans une enceinte passive');
+  assert.ok(C.canLink(lv, 'xlr', 'con.in1', 'amp.inA'), 'deux femelles');
+  assert.strictEqual(C.canLink(lv, 'speakon', 'amp.outA', 'pl.in'), null);
+});

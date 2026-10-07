@@ -74,6 +74,7 @@
       if (root.SonoParcours) root.SonoParcours.init(this);
       if (root.SonoQuiz) root.SonoQuiz.init(this);
       if (root.SonoCoach) root.SonoCoach.init(this);
+      if (root.SonoCablage) root.SonoCablage.init(this);
       document.addEventListener('pointerdown', (e) => {
         if (root.SonoCoach && root.SonoCoach.explain && e.target.closest('#view-sim') && !e.target.closest('#btn-explain') && !e.target.closest('.spot-bubble')) e.stopPropagation();
       }, true);
@@ -84,7 +85,7 @@
       const hash = (location.hash || '').replace('#', '');
       const firstTime = !Object.keys(U.store.get('parcours', {})).length;
       const narrow = root.innerWidth < 720;
-      if (['concert', 'atelier', 'parcours', 'quiz', 'fiches'].includes(hash)) this.switchView(hash);
+      if (['concert', 'atelier', 'parcours', 'quiz', 'fiches', 'cablage'].includes(hash)) this.switchView(hash);
       else if (firstTime || narrow) this.switchView('parcours');
       else this.switchView('concert');
     },
@@ -112,7 +113,9 @@
       });
       const sim = v === 'concert' || v === 'atelier';
       $('view-sim').hidden = !sim;
-      ['parcours', 'quiz', 'fiches'].forEach(k => { $('view-' + k).hidden = v !== k; });
+      ['parcours', 'quiz', 'fiches', 'cablage'].forEach(k => { $('view-' + k).hidden = v !== k; });
+      if (v !== 'cablage' && root.SonoCablage) root.SonoCablage.leave();
+      if (v === 'cablage' && root.SonoCablage) root.SonoCablage.show();
       if (v !== 'parcours' && root.SonoParcours) root.SonoParcours.leave();
       if (v !== 'quiz' && root.SonoQuiz) root.SonoQuiz.leave();
       if (v === 'quiz' && root.SonoQuiz) root.SonoQuiz.show();

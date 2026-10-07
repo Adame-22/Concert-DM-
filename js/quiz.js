@@ -24,7 +24,8 @@
     combo: { name: 'En feu', desc: 'Une série de 10 bonnes réponses' },
     parcours: { name: 'Diplômé', desc: 'Finir toutes les leçons' },
     concert: { name: 'Prêt pour le jour J', desc: '80/100 sur un plateau du concert' },
-    zerolarsen: { name: 'Zéro larsen', desc: 'Un plateau entier sans le moindre larsen' }
+    zerolarsen: { name: 'Zéro larsen', desc: 'Un plateau entier sans le moindre larsen' },
+    cablage: { name: 'Câbleur', desc: 'Réussir toutes les installations du câblage' }
   };
   const Profil = {
     data() { return Object.assign({ xp: 0, badges: [], best: {}, cats: {} }, U.store.get('profil', {})); },
@@ -78,7 +79,7 @@
       el.title = 'Niveau ' + L.n + ' · ' + this.data().xp + ' XP';
     }
   };
-  function toastBox() { return $('pc-toasts') || $('qz-toasts') || $('toasts'); }
+  function toastBox() { return ['cb-toasts', 'pc-toasts', 'qz-toasts', 'toasts'].map($).find(el => el && el.offsetParent !== null) || $('toasts'); }
 
   // ------------------------------------------------------------ Questions à l’écoute
   const Mu = () => root.SonoMusic;
